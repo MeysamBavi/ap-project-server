@@ -2,9 +2,9 @@ import java.net.Socket;
 
 public class UserHandler extends ClientHandler{
 
-    UserHandler(Socket s)
+    UserHandler(Socket s , Database d)
     {
-        super(s);
+        super(s,d);
     }
 
     @Override

@@ -2,9 +2,9 @@ import java.net.Socket;
 
 public class OwnerHandler extends ClientHandler{
 
-    OwnerHandler(Socket s)
+    OwnerHandler(Socket s , Database d)
     {
-        super(s);
+        super(s,d);
     }
 
     @Override
