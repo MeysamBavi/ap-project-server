@@ -70,21 +70,24 @@ public class Database {
 
     //creating a new object based on id and saving it in our database
     public void createNewObj(String id, String JSON) {
-//        if (id.startsWith("M-")) {
-//            Menus.put(id,Address);
-//        }
-//        else if (id.startsWith("R-")) {
-//            Restaurants.put(id, Address);
-//        }
-//        else if (id.startsWith("C-")){
-//            Comments.put(id,Address);
-//        }else if (id.startsWith("O-")) {
-//            Orders.put(id,Address);
-//        }else if (id.startsWith("F-")) {
-//            Foods.put(id,Address);
-//        }
-//        Database.SaveFile(id,JSON,Address);
-        //TODO
+        String newJSONDirectory = "";
+        switch (id.substring(0 , 2))
+        {
+            case "O-":
+              newJSONDirectory = ordersDirectory.getAbsolutePath() + File.separator + id + ".json";
+              break;
+            case "R-":
+              newJSONDirectory = restaurantsDirectory.getAbsolutePath() + File.separator + id + ".json";
+              break;
+            case "M-":
+              newJSONDirectory = menusDirectory.getAbsolutePath() + File.separator + id + ".json";
+              break;
+            case "C-":
+              newJSONDirectory = commentsDirectory.getAbsolutePath() + File.separator + id + ".json";
+              break;
+        }
+        writeFileFromString(Paths.get(newJSONDirectory) , JSON);
+
     }
 
     private static String readFileToString(Path path) {
