@@ -28,7 +28,7 @@ public class Database {
 
     public static ConcurrentHashMap<String , String> Orders = new ConcurrentHashMap<>();
 
-    //save the newjson to the id
+    //save the new json to the id
     public static void SaveChangeByID(String id , String newJSON)
     {
        String Address = getObjectByID(id);
