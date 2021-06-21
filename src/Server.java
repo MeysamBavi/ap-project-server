@@ -9,8 +9,8 @@ public class Server {
         {
             Socket cs = ss.accept();
             System.out.println("Client connected");
-            ClientHandler ch = new ClientHandler(cs);
-            ch.start();
+
+
         }
     }
 }
