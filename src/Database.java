@@ -35,7 +35,7 @@ public class Database {
        SaveFile(id,newJSON,Address);
     }
 
-    //returns the address of the file containing the json of this file
+    //returns the json string saved in the database
     public static String getObjectByID(String id)
     {
         //if we want to make the object we need to use gson parser but i don't see any use in it ::
@@ -45,21 +45,21 @@ public class Database {
         {
             if (Menus.containsKey(id))
             {
-                retStr = Menus.get(id);
+                retStr = getJSON(Menus.get(id));
             }
         }
         if (id.startsWith("R-"))
         {
             if (Restaurants.containsKey(id))
             {
-                retStr = Menus.get(id);
+                retStr = getJSON(Restaurants.get(id));
             }
         }
         if (id.startsWith("C-"))
         {
             if (Comments.containsKey(id))
             {
-                retStr = Menus.get(id);
+                retStr = getJSON(Comments.get(id));
             }
         }
         return retStr;
