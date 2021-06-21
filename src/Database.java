@@ -1,118 +1,109 @@
-import com.google.gson.Gson;
-
 import java.io.*;
-
-import java.util.Scanner;
-import java.util.concurrent.ConcurrentHashMap;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 
 public class Database {
+    private File mainDirectory;
+    private File ordersDirectory;
+    private File restaurantsDirectory;
+    private File menusDirectory;
+    private File commentsDirectory;
+    private File userAccountsDirectory;
+    private File ownerAccountsDirectory;
 
-    //all fields in database are static..
+    public Database(String directory) {
+        File dir = new File(directory);
+        dir.mkdir();
+        if (!dir.isDirectory()) {
+            throw new RuntimeException("Not a directory.");
+        }
+        mainDirectory = dir;
+        createSubDirectories();
+    }
 
+    // creates sub directories. if they already exist, nothing happens.
+    private void createSubDirectories() {
+        ordersDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "orders" + File.separator);
+        ordersDirectory.mkdir();
+        restaurantsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "restaurants" + File.separator);
+        restaurantsDirectory.mkdir();
+        menusDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "menus" + File.separator);
+        menusDirectory.mkdir();
+        commentsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "comments" + File.separator);
+        commentsDirectory.mkdir();
+        userAccountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "user-accounts" + File.separator);
+        userAccountsDirectory.mkdir();
+        ownerAccountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "owner-accounts" + File.separator);
+        ownerAccountsDirectory.mkdir();
+    }
 
-    //first string is for the id and the second one is for the file address
-
-    public static ConcurrentHashMap<String , String> Comments = new ConcurrentHashMap<>();
-
-    public static ConcurrentHashMap<String , String> Restaurants = new ConcurrentHashMap<>();
-
-    public static ConcurrentHashMap<String , String> Menus = new ConcurrentHashMap<>();
-
-    public static ConcurrentHashMap<String , String> UserAccounts = new ConcurrentHashMap<>();
-
-    public static ConcurrentHashMap<String , String> OwnerAccounts = new ConcurrentHashMap<>();
-
-    public static ConcurrentHashMap<String , String> Images = new ConcurrentHashMap<>();
-
-    public static ConcurrentHashMap<String , String> Foods = new ConcurrentHashMap<>();
-
-    public static ConcurrentHashMap<String , String> Orders = new ConcurrentHashMap<>();
+    // returns json string to caller (probably server). server can modify object with gson or directly send it to client.
+    public String getJson(String id) {
+        String directory = "";
+        switch (id.substring(0, 2)) {
+            case "O-":
+                directory = ordersDirectory.getAbsolutePath();
+                break;
+            case "R-":
+                directory = restaurantsDirectory.getAbsolutePath();
+                break;
+            case "M-":
+                directory = menusDirectory.getAbsolutePath();
+                break;
+            case "C-":
+                directory = commentsDirectory.getAbsolutePath();
+                break;
+            default:
+                return null;
+        }
+        return readFileToString(Paths.get(directory + File.separator + id + ".json"));
+    }
 
     //save the new json to the id
-    public static void SaveChangeByID(String id , String newJSON)
-    {
-       String Address = getObjectByID(id);
-       SaveFile(id,newJSON,Address);
+    public void saveChangeByID(String id , String newJSON) {
+//       String Address = getObjectByID(id);
+//       SaveFile(id,newJSON,Address);
+        //TODO
     }
 
-    //returns the json string saved in the database
-    public static String getObjectByID(String id)
-    {
-        //if we want to make the object we need to use gson parser but i don't see any use in it ::
-        Gson gson = new Gson();
-        String retStr = "";
-        if (id.startsWith("M-"))
-        {
-            if (Menus.containsKey(id))
-            {
-                retStr = getJSON(Menus.get(id));
-            }
-        }
-        if (id.startsWith("R-"))
-        {
-            if (Restaurants.containsKey(id))
-            {
-                retStr = getJSON(Restaurants.get(id));
-            }
-        }
-        if (id.startsWith("C-"))
-        {
-            if (Comments.containsKey(id))
-            {
-                retStr = getJSON(Comments.get(id));
-            }
-        }
-        return retStr;
+    //creating a new object based on id and saving it in our database
+    public void createNewObj(String id, String JSON) {
+//        if (id.startsWith("M-")) {
+//            Menus.put(id,Address);
+//        }
+//        else if (id.startsWith("R-")) {
+//            Restaurants.put(id, Address);
+//        }
+//        else if (id.startsWith("C-")){
+//            Comments.put(id,Address);
+//        }else if (id.startsWith("O-")) {
+//            Orders.put(id,Address);
+//        }else if (id.startsWith("F-")) {
+//            Foods.put(id,Address);
+//        }
+//        Database.SaveFile(id,JSON,Address);
+        //TODO
     }
 
-    //creating a new object based on id and putting it on our hashmap
-    public static void CreateNewObj(String id ,String JSON, String Address)
-    {
-        if (id.startsWith("M-")) {
-            Menus.put(id,Address);
-        }
-        else if (id.startsWith("R-")) {
-            Restaurants.put(id, Address);
-        }
-        else if (id.startsWith("C-")){
-            Comments.put(id,Address);
-        }else if (id.startsWith("O-")) {
-            Orders.put(id,Address);
-        }else if (id.startsWith("F-")) {
-            Foods.put(id,Address);
-        }
-        Database.SaveFile(id,JSON,Address);
-    }
-
-    //saving a file to the selected address and writing the data inside it (JSON in our case)
-    private static void SaveFile(String id , String Data , String Address)
-    {
-        File f = new File(Address+"\\"+id+".json");
+    private static String readFileToString(Path path) {
         try {
-            FileWriter fw = new FileWriter(Address,false);
-            fw.write(Data);
-            fw.flush();
+            return Files.readString(path, StandardCharsets.US_ASCII);
         } catch (IOException e) {
-            System.out.println("error happened while trying to write data in the file !!");
+            e.printStackTrace();
+            return null;
         }
     }
 
-    //getting the json string inside the json file created
-    private static String getJSON(String Address)
-    {
-        File f = new File(Address);
-        StringBuilder retJSON = new StringBuilder((int) f.length());
+    //a util function to write a string to a file
+    private static void writeFileFromString(Path path, String data) {
+        //TODO lock the file with lock system
         try {
-            Scanner scanner = new Scanner(f);
-            while (scanner.hasNextLine())
-            {
-                retJSON.append(scanner.nextLine());
-            }
-        } catch (FileNotFoundException e) {
-            System.out.println("file was not found");
+            Files.writeString(path, data);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return retJSON.toString();
     }
-
 
 }
