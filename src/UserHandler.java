@@ -11,51 +11,44 @@ import java.util.Map;
 
 public class UserHandler extends ClientHandler{
 
-    UserHandler(Socket s , Database d)
+    UserHandler(Socket s , Database d , DataInputStream dis , DataOutputStream dos)
     {
-        super(s,d);
+        super(s,d,dis,dos);
     }
 
     @Override
     public void run() {
         try {
-            String Command = new String(dis.readNBytes(dis.readInt()));
-            String[] AnalyzableCommand = Command.split("-");
+            String Command = readString();
+            String[] AnalyzableCommand = Command.split(separator);
             Gson gson = new Gson();
             //userID = "U-phonenumber"
 
-            //order-userID-RestaurantID-OrderJson
+            //order(*)userID(*)newJson
 
-            //credit-userID-amount
+            //credit(*)userID(*)newJson
             if (AnalyzableCommand[0].equals("credit"))
             {
-                String json = database.getJson(AnalyzableCommand[1]+"-"+AnalyzableCommand[2]);
-                Type type = new TypeToken<Map<String,String>>(){}.getType();
-                Map<String , String> jsonMap = gson.fromJson(json , type);
-                int currentCredit = Integer.parseInt(jsonMap.get("credit")) ;
-                currentCredit += Integer.parseInt(AnalyzableCommand[3]);
-                jsonMap.put("credit" , String.valueOf(currentCredit));
-
-                String newJson = gson.toJson(jsonMap);
-                dos.writeUTF(newJson);
-                database.saveChangeByID(AnalyzableCommand[1]+"-"+AnalyzableCommand[2] , newJson);
+                database.saveChangeByID(AnalyzableCommand[1],AnalyzableCommand[2]);
+                writeString("credit added successfully");
             }
-            //AddAddress-userID-newAddressJson
-            else if (AnalyzableCommand[0].equals("AddAddress"))
+
+            //AddAddress(*)userID(*)newJson
+            else if (AnalyzableCommand[0].equals("Address"))
             {
-                String json = database.getJson(AnalyzableCommand[1]+"-"+AnalyzableCommand[2]);
-                Type type = new TypeToken<Map<String,String>>(){}.getType();
-                Map<String , String> jsonMap = gson.fromJson(json , type);
-                ArrayList<String> currentAddresses = gson.fromJson(jsonMap.get("addresses"), new TypeToken<String>(){}.getType());
-                currentAddresses.add(AnalyzableCommand[3]);
-                jsonMap.put("addresses" , gson.toJson(currentAddresses));
-
-                String newJson = gson.toJson(jsonMap);
-                dos.writeUTF(newJson);
-                database.saveChangeByID(AnalyzableCommand[1]+"-"+AnalyzableCommand[2] , newJson);
+                database.saveChangeByID(AnalyzableCommand[1] , AnalyzableCommand[2]);
+                writeString("Address added/edited successfully");
             }
-            //Comment-UserID-RestaurantID
-
+            //Comment(*)UserID(*)UserJSON(*)RestaurantID(*)RestaurantsJSON(*)CommentID(*)CommentJSON
+            else if (AnalyzableCommand[0].equals("Comment"))
+            {
+                database.saveChangeByID(AnalyzableCommand[1] , AnalyzableCommand[2]);
+                writeString("Comment added to User Comments");
+                database.saveChangeByID(AnalyzableCommand[3] , AnalyzableCommand[4]);
+                writeString("Comment added to Restaurant Comments");
+                database.saveChangeByID(AnalyzableCommand[5] , AnalyzableCommand[6]);
+                writeString("Comment added to Database");
+            }
 
 
 
