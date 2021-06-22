@@ -29,4 +29,18 @@ public abstract class ClientHandler extends Thread {
         dos.writeBytes(data);
     }
 
+    UserHandler toUserHandler() {
+        return new UserHandler(socket, database, dis, dos);
+    }
+
+    OwnerHandler toOwnerHandler() {
+        return new OwnerHandler(socket, database, dis, dos);
+    }
+
+    void endConnection() throws IOException {
+        dis.close();
+        dos.close();
+        socket.close();
+    }
+
 }
