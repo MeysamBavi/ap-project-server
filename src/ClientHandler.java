@@ -1,23 +1,32 @@
-import java.io.*;
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
 
-public abstract class ClientHandler extends Thread{
-    Database database;
-    Socket s;
-    DataOutputStream dos;
-    DataInputStream dis;
+public abstract class ClientHandler extends Thread {
+    final Database database;
+    private Socket socket;
+    private DataOutputStream dos;
+    private DataInputStream dis;
+    public static String separator = "|*|*|";
 
-    ClientHandler(Socket s , Database database)
-    {
-        this.s = s;
+    ClientHandler(Socket socket, Database database) throws IOException {
+        this(socket, database, new DataInputStream(socket.getInputStream()), new DataOutputStream(socket.getOutputStream()));
+    }
+
+    ClientHandler(Socket socket, Database database, DataInputStream dis, DataOutputStream dos) {
+        this.socket = socket;
         this.database = database;
-        try {
-            this.dos = new DataOutputStream(s.getOutputStream());
-            this.dis = new DataInputStream(s.getInputStream());
-        }catch (Exception e)
-        {
-            e.printStackTrace();
-        }
+        this.dis = dis;
+        this.dos = dos;
+    }
+
+    String readString() throws IOException {
+        return new String(dis.readNBytes(dis.readInt()));
+    }
+
+    void writeString(String data) throws IOException {
+        dos.writeBytes(data);
     }
 
 }
