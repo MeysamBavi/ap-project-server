@@ -55,6 +55,12 @@ public class Database {
             case "C-":
                 directory = commentsDirectory.getAbsolutePath();
                 break;
+            case "U-":
+                directory = userAccountsDirectory.getAbsolutePath();
+                break;
+            case "W-":
+                directory = ownerAccountsDirectory.getAbsolutePath();
+                break;
             default:
                 return null;
         }
@@ -74,17 +80,23 @@ public class Database {
         switch (id.substring(0 , 2))
         {
             case "O-":
-              newJSONDirectory = ordersDirectory.getAbsolutePath() + File.separator + id + ".json";
-              break;
+                newJSONDirectory = ordersDirectory.getAbsolutePath() + File.separator + id + ".json";
+                break;
             case "R-":
-              newJSONDirectory = restaurantsDirectory.getAbsolutePath() + File.separator + id + ".json";
-              break;
+                newJSONDirectory = restaurantsDirectory.getAbsolutePath() + File.separator + id + ".json";
+                break;
             case "M-":
-              newJSONDirectory = menusDirectory.getAbsolutePath() + File.separator + id + ".json";
-              break;
+                newJSONDirectory = menusDirectory.getAbsolutePath() + File.separator + id + ".json";
+                break;
             case "C-":
-              newJSONDirectory = commentsDirectory.getAbsolutePath() + File.separator + id + ".json";
-              break;
+                newJSONDirectory = commentsDirectory.getAbsolutePath() + File.separator + id + ".json";
+                break;
+            case "U-":
+                newJSONDirectory = userAccountsDirectory.getAbsolutePath() + File.separator + id + ".json";
+                break;
+            case "W-":
+                newJSONDirectory = ownerAccountsDirectory.getAbsolutePath() + File.separator + id + ".json";
+                break;
         }
         writeFileFromString(Paths.get(newJSONDirectory) , JSON);
 

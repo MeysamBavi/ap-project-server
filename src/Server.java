@@ -10,7 +10,8 @@ public class Server {
         {
             Socket cs = ss.accept();
             System.out.println("Client connected");
-
+            LoginHandler lh = new LoginHandler(cs , database);
+            lh.start();
 
         }
     }

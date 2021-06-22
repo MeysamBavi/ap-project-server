@@ -1,6 +1,4 @@
-import java.io.DataInputStream;
-import java.io.DataOutputStream;
-import java.io.IOException;
+import java.io.*;
 import java.net.Socket;
 
 public abstract class ClientHandler extends Thread{
@@ -16,7 +14,8 @@ public abstract class ClientHandler extends Thread{
         try {
             this.dos = new DataOutputStream(s.getOutputStream());
             this.dis = new DataInputStream(s.getInputStream());
-        }catch (Exception e){
+        }catch (Exception e)
+        {
             e.printStackTrace();
         }
     }
