@@ -3,6 +3,8 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.HashMap;
+import java.util.Map;
 import com.google.gson.Gson;
 
 public class Database {
@@ -14,6 +16,9 @@ public class Database {
     private File userAccountsDirectory;
     private File ownerAccountsDirectory;
     private File discountsDirectory;
+    private File loginDataFile;
+    private Map<String, String> loginData;
+    private Gson gson = new Gson();
 
     public Database(String directory) {
         File dir = new File(directory);
@@ -41,6 +46,16 @@ public class Database {
         ownerAccountsDirectory.mkdir();
         discountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "discounts");
         discountsDirectory.mkdir();
+        loginDataFile = new File(mainDirectory.getAbsolutePath() + File.separator + "loginData.json");
+        try {
+            loginDataFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        loginData = gson.fromJson(readFileToString(loginDataFile.toPath()), Map.class);
+        if (loginData == null) {
+            loginData = new HashMap<>();
+        }
     }
 
     // returns json string to caller (probably server). server can modify object with gson or directly send it to client.
@@ -118,7 +133,10 @@ public class Database {
         writeFileFromString(Paths.get(newJSONDirectory + File.separator + id + ".json"), JSON);
     }
 
-    public void createNewObj(String phoneNumber, boolean isUser, String JSON) {
+    //for signup
+    public void createNewObj(String phoneNumber, String password, boolean isUser, String JSON) {
+        loginData.put(phoneNumber, password);
+        writeFileFromString(loginDataFile.toPath(), gson.toJson(loginData));
         Path path;
         if (isUser) {
             path = Paths.get(userAccountsDirectory.getAbsolutePath() + File.separator + phoneNumber + ".json");
@@ -167,7 +185,6 @@ public class Database {
     }
 
     public void search(SearchQuery<Restaurant> searchQuery) {
-        Gson gson = new Gson();
         File[] files = restaurantsDirectory.listFiles();
         assert files != null;
         for (File file : files) {
@@ -175,6 +192,10 @@ public class Database {
             searchQuery.feed(restaurant);
         }
         searchQuery.finish();
+    }
+
+    public boolean checkPassword(String phoneNumber, String password) {
+        return password.equals(loginData.get(phoneNumber));
     }
 
 }
