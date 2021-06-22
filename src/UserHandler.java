@@ -1,9 +1,12 @@
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.Map;
 
 public class UserHandler extends ClientHandler{
@@ -36,8 +39,23 @@ public class UserHandler extends ClientHandler{
                 String newJson = gson.toJson(jsonMap);
                 dos.writeUTF(newJson);
                 database.saveChangeByID(AnalyzableCommand[1]+"-"+AnalyzableCommand[2] , newJson);
-
             }
+            //AddAddress-userID-newAddressJson
+            else if (AnalyzableCommand[0].equals("AddAddress"))
+            {
+                String json = database.getJson(AnalyzableCommand[1]+"-"+AnalyzableCommand[2]);
+                Type type = new TypeToken<Map<String,String>>(){}.getType();
+                Map<String , String> jsonMap = gson.fromJson(json , type);
+                ArrayList<String> currentAddresses = gson.fromJson(jsonMap.get("addresses"), new TypeToken<String>(){}.getType());
+                currentAddresses.add(AnalyzableCommand[3]);
+                jsonMap.put("addresses" , gson.toJson(currentAddresses));
+
+                String newJson = gson.toJson(jsonMap);
+                dos.writeUTF(newJson);
+                database.saveChangeByID(AnalyzableCommand[1]+"-"+AnalyzableCommand[2] , newJson);
+            }
+            //Comment-UserID-RestaurantID
+
 
 
 
