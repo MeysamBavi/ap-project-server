@@ -3,6 +3,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import com.google.gson.Gson;
 
 public class Database {
     private File mainDirectory;
@@ -163,6 +164,17 @@ public class Database {
         } catch (IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public void search(SearchQuery<Restaurant> searchQuery) {
+        Gson gson = new Gson();
+        File[] files = restaurantsDirectory.listFiles();
+        assert files != null;
+        for (File file : files) {
+            Restaurant restaurant = gson.fromJson(readFileToString(file.toPath()), Restaurant.class);
+            searchQuery.feed(restaurant);
+        }
+        searchQuery.finish();
     }
 
 }
