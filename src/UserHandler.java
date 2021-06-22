@@ -22,15 +22,30 @@ public class UserHandler extends ClientHandler{
             String Command = readString();
             String[] AnalyzableCommand = Command.split(separator);
             Gson gson = new Gson();
-            //userID = "U-phonenumber"
-
+            //Signup(*)Phonenumber(*)JSON
+            if (AnalyzableCommand[0].equals("Signup"))
+            {
+                database.createNewObj(AnalyzableCommand[1],true,AnalyzableCommand[2]);
+                writeString("User added to the server");
+            }
+            //Login(*)Phonenumber
+            else if (AnalyzableCommand[0].equals("Login"))
+            {
+                if (database.getJson(AnalyzableCommand[1],true)!=null)
+                {
+                    writeString(database.getJson(AnalyzableCommand[1],true));
+                }else
+                {
+                    writeString("please create your account first !");
+                }
+            }
             //order(*)userID(*)newJson
 
             //credit(*)userID(*)newJson
-            if (AnalyzableCommand[0].equals("credit"))
+            if (AnalyzableCommand[0].equals("Credit"))
             {
                 database.saveChangeByID(AnalyzableCommand[1],AnalyzableCommand[2]);
-                writeString("credit added successfully");
+                writeString("Credit added successfully");
             }
 
             //AddAddress(*)userID(*)newJson
