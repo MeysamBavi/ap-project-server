@@ -42,7 +42,7 @@ public class UserHandler extends ClientHandler{
             //order(*)userID(*)newJson
 
             //credit(*)userID(*)newJson
-            if (AnalyzableCommand[0].equals("Credit"))
+            else if (AnalyzableCommand[0].equals("Credit"))
             {
                 database.saveChangeByID(AnalyzableCommand[1],AnalyzableCommand[2]);
                 writeString("Credit added successfully");
@@ -64,9 +64,16 @@ public class UserHandler extends ClientHandler{
                 database.saveChangeByID(AnalyzableCommand[5] , AnalyzableCommand[6]);
                 writeString("Comment added to Database");
             }
-
-
-
+            //Discount(*)Discountcode(*)OrderID(*)OrderJSON
+            else if (AnalyzableCommand[0].equals("Discount"))
+            {
+                if (database.getDiscountJson(AnalyzableCommand[1]) != null)
+                {
+                    writeString("Discount");
+                    database.saveChangeByID(AnalyzableCommand[2],AnalyzableCommand[3]);
+                    writeString("discount completed!");
+                }
+            }
 
         } catch (Exception e) {
             e.printStackTrace();
