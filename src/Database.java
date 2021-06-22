@@ -83,6 +83,10 @@ public class Database {
         ));
     }
 
+    public String getJson(String menuID, String foodID) {
+        return readFileToString(Paths.get(menusDirectory.getAbsolutePath() + File.separator + menuID + File.separator + foodID + ".json"));
+    }
+
     //save the new json to the id
     public void saveChangeByID(String id , String newJSON) {
 //       String Address = getObjectByID(id);
@@ -96,19 +100,21 @@ public class Database {
         switch (id.substring(0 , 2))
         {
             case "O-":
-                newJSONDirectory = ordersDirectory.getAbsolutePath() + File.separator + id + ".json";
+                newJSONDirectory = ordersDirectory.getAbsolutePath();
                 break;
             case "R-":
-                newJSONDirectory = restaurantsDirectory.getAbsolutePath() + File.separator + id + ".json";
+                newJSONDirectory = restaurantsDirectory.getAbsolutePath();
                 break;
             case "M-":
-                newJSONDirectory = menusDirectory.getAbsolutePath() + File.separator + id + File.separator + id + ".json";
+                newJSONDirectory = menusDirectory.getAbsolutePath() + File.separator + id;
+                File directory = new File(newJSONDirectory);
+                directory.mkdir();
                 break;
             case "C-":
-                newJSONDirectory = commentsDirectory.getAbsolutePath() + File.separator + id + ".json";
+                newJSONDirectory = commentsDirectory.getAbsolutePath();
                 break;
         }
-        writeFileFromString(Paths.get(newJSONDirectory), JSON);
+        writeFileFromString(Paths.get(newJSONDirectory + File.separator + id + ".json"), JSON);
     }
 
     public void createNewObj(String phoneNumber, boolean isUser, String JSON) {
@@ -116,9 +122,18 @@ public class Database {
         if (isUser) {
             path = Paths.get(userAccountsDirectory.getAbsolutePath() + File.separator + phoneNumber + ".json");
         } else {
-            path = Paths.get(ownerAccountsDirectory.getAbsolutePath() + File.separator + phoneNumber + File.separator + phoneNumber + ".json");
+            File dir = new File(ownerAccountsDirectory.getAbsolutePath() + File.separator + phoneNumber);
+            dir.mkdir();
+            path = Paths.get(dir.getAbsolutePath() +  File.separator + phoneNumber + ".json");
         }
         writeFileFromString(path, JSON);
+    }
+
+    public void createNewObj(String menuID, String foodID, String JSON) {
+        writeFileFromString(
+                Paths.get(menusDirectory.getAbsolutePath() + File.separator + menuID + File.separator + foodID + ".json"),
+                JSON
+        );
     }
 
     public String getDiscountJson(String code) {
@@ -129,6 +144,7 @@ public class Database {
         // TODO
     }
 
+    //if doesn't exist, this returns null
     private static String readFileToString(Path path) {
         try {
             return Files.readString(path, StandardCharsets.US_ASCII);
@@ -139,6 +155,7 @@ public class Database {
     }
 
     //a util function to write a string to a file
+    //make sure that path exists, otherwise nothing happens
     private static void writeFileFromString(Path path, String data) {
         //TODO lock the file with lock system
         try {
