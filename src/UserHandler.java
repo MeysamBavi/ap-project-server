@@ -22,10 +22,10 @@ public class UserHandler extends ClientHandler{
                 database.createNewObj(AnalyzableCommand[1],AnalyzableCommand[2],true,AnalyzableCommand[3]);
                 writeString("User added to the server");
             }
-            //Login(*)Phonenumber
+            //Login(*)Phonenumber(*)Password
             else if (AnalyzableCommand[0].equals("Login"))
             {
-                if (database.getJson(AnalyzableCommand[1],true)!=null)
+                if (database.checkPassword(AnalyzableCommand[1] , AnalyzableCommand[2]))
                 {
                     writeString(database.getJson(AnalyzableCommand[1],true));
                 }else
