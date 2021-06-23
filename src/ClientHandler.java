@@ -31,11 +31,6 @@ public abstract class ClientHandler extends Thread {
         this.gson = gson;
     }
 
-    void Serialize(String prefix) throws IOException {
-        String serializedCode = database.GenerateID(prefix);
-        writeString(serializedCode);
-    }
-
     String readString() throws IOException {
         return new String(dis.readNBytes(dis.readInt()));
     }

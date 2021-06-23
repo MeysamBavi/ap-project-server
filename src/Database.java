@@ -36,25 +36,38 @@ public class Database {
         locks = new ConcurrentHashMap<>();
     }
 
-   public String GenerateID(String prefix)
-   {
-       StringBuilder retStr = new StringBuilder();
-       retStr.append(prefix+"-");
-       Random rnd = new Random();
-       String rand1 = Integer.toString(rnd.nextInt(0x10000),16).toUpperCase(Locale.ROOT);
-       if (rand1.length()<4)
-       {
-           retStr.append("0".repeat(4-rand1.length()));
+   public String generateID(String typeOfObject) {
+       String prefix = getPrefix(typeOfObject);
+       StringBuilder result = new StringBuilder();
+       result.append(prefix).append("-");
+       Random random = new Random();
+       String rand1 = Integer.toString(random.nextInt(0x10000),16).toUpperCase();
+       if (rand1.length() < 4) {
+           result.insert(0, "0".repeat(4 - rand1.length()));
        }
-       retStr.append(rand1+"-");
-       String rand2 = Integer.toString(rnd.nextInt(0x10000),16).toUpperCase(Locale.ROOT);
-       if (rand2.length()<4)
-       {
-           retStr.append("0".repeat(4-rand2.length()));
+       result.append(rand1).append("-");
+       String rand2 = Integer.toString(random.nextInt(0x10000),16).toUpperCase(Locale.ROOT);
+       if (rand2.length() < 4) {
+           result.insert(0, "0".repeat(4 - rand2.length()));
        }
-       retStr.append(rand2+"-");
-       return retStr.toString();
+       result.append(rand2);
+       return result.toString();
+   }
 
+   private String getPrefix(String type) {
+        switch (type) {
+            case "restaurant":
+                return "R";
+            case "order":
+                return "O";
+            case "comment":
+                return "C";
+            case "foodMenu":
+                return "M";
+            case "food":
+                return "F";
+        }
+        return "X";
    }
 
     // creates sub directories. if they already exist, nothing happens.
