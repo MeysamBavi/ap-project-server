@@ -12,19 +12,6 @@ public class OwnerHandler extends ClientHandler {
         super(socket, database, dis, dos);
     }
 
-    //list of commands:
-    //serialize [object type], response: id string
-    //activeOrders, response: {json object with one field (activeOrders)}
-    //deliver [order id] {owner account}
-    //editFood [menu id] [food id] {food object}
-    //addFood [menu id] [food id] {food object}
-    //editRestaurant [restaurant id] {restaurant object}
-    //editMenu [menu id] [menu object]
-    //addImage [image id] [image file]
-    //editImage [image id] [image file]
-    //editComment [comment id] {comment object}
-
-
     @Override
     public void run() {
         boolean shouldEnd = false;
@@ -108,48 +95,78 @@ public class OwnerHandler extends ClientHandler {
         return toJson(map);
     }
 
-    //signup [phoneNumber] [password] {owner account} {restaurant object}
+    //signup [phoneNumber] [password] {owner account} [restaurantID] {restaurant object}
+    // assuming phoneNumber is unique
     private String signUp(String[] ac) {
-        return null;
+        database.createNewObj(ac[1], ac[2], false, ac[3]);
+        database.createNewObj(ac[4], ac[5]);
+        return String.valueOf(true);
     }
 
-    private String serialize(String[] analyzableCommand) {
-        return null;
+    //serialize [object type], response: id string
+    private String serialize(String[] ac) {
+        return database.generateID(ac[1]);
     }
 
-    private String getActiveOrders(String[] analyzableCommand) {
-        return null;
+    //activeOrders [phoneNumber], response: {json object with one field (activeOrders)}
+    private String getActiveOrders(String[] ac) {
+        Map<String, Object> map = jsonToMap(database.getActiveOrdersJson(ac[1]));
+        List<String> activeOrdersIDs = (List<String>) map.get("activeOrders");
+        final List<Object> activeOrders = new ArrayList<>(activeOrdersIDs.size());
+        activeOrdersIDs.forEach((e) -> activeOrders.add(jsonToObject(database.getJson(e))));
+        map.put("activeOrders", activeOrders);
+        return toJson(map);
     }
 
-    private String deliver(String[] analyzableCommand) {
-        return null;
+    //deliver [order id] {order object} [phoneNumber] {owner account} {active orders}
+    private String deliver(String[] ac) {
+        database.saveChangeByID(ac[1], ac[2]);
+//        TODO
+//        database.saveChangeByID(ac[3], false, ac[4]);
+//        database.saveActiveOrders(ac[3], ac[5]);
+        return String.valueOf(true);
     }
 
-    private String editFood(String[] analyzableCommand) {
-        return null;
+    //editFood [menu id] [food id] {food object}
+    private String editFood(String[] ac) {
+//        TODO
+//        database.saveChangeByID(ac[1], ac[2], ac[3]);
+        return String.valueOf(true);
     }
 
-    private String addFood(String[] analyzableCommand) {
-        return null;
+    //addFood [menu id] [food id] {food object}
+    private String addFood(String[] ac) {
+        database.createNewObj(ac[1], ac[2], ac[3]);
+        return String.valueOf(true);
     }
 
-    private String editRestaurant(String[] analyzableCommand) {
-        return null;
+    //editRestaurant [restaurant id] {restaurant object}
+    private String editRestaurant(String[] ac) {
+        database.saveChangeByID(ac[1], ac[2]);
+        return String.valueOf(true);
     }
 
-    private String editMenu(String[] analyzableCommand) {
-        return null;
+    //editMenu [menu id] [menu object]
+    private String editMenu(String[] ac) {
+        database.saveChangeByID(ac[1], ac[2]);
+        return String.valueOf(true);
     }
 
+    //addImage [image id] [image file]
     private String addImage(String[] analyzableCommand) {
+//        TODO
         return null;
     }
 
+    //editImage [image id] [image file]
     private String editImage(String[] analyzableCommand) {
+//        TODO
         return null;
     }
 
-    private String editComment(String[] analyzableCommand) {
-        return null;
+    //editComment [comment id] {comment object}
+    private String editComment(String[] ac) {
+        database.saveChangeByID(ac[1], ac[2]);
+        return String.valueOf(true);
     }
 }
