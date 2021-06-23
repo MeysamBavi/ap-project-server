@@ -3,7 +3,6 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -116,6 +115,16 @@ public class Database {
                         File.separator +
                         phoneNumber +
                         ".json"
+        ));
+    }
+
+    public String getActiveOrdersJson(String phoneNumber) {
+        return readFileToString(Paths.get(
+                ownerAccountsDirectory.getAbsolutePath() +
+                        File.separator +
+                        phoneNumber +
+                        File.separator +
+                        "activeOrders.json"
         ));
     }
 
