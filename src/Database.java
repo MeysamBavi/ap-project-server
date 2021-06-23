@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import com.google.gson.Gson;
@@ -35,16 +36,23 @@ public class Database {
         locks = new ConcurrentHashMap<>();
     }
 
-   public static String GenerateID(String prefix)
+   public String GenerateID(String prefix)
    {
        StringBuilder retStr = new StringBuilder();
        retStr.append(prefix+"-");
-       Object rndNum = new Object();
-       retStr.append(Integer.toString(rndNum.hashCode(),16).substring(0,4).toUpperCase(Locale.ROOT));
-       retStr.append("-");
-       retStr.append(Integer.toString(rndNum.hashCode(),16).substring(4,8).toUpperCase(Locale.ROOT));
-
-
+       Random rnd = new Random();
+       String rand1 = Integer.toString(rnd.nextInt(0x10000),16).toUpperCase(Locale.ROOT);
+       if (rand1.length()<4)
+       {
+           retStr.append("0".repeat(4-rand1.length()));
+       }
+       retStr.append(rand1+"-");
+       String rand2 = Integer.toString(rnd.nextInt(0x10000),16).toUpperCase(Locale.ROOT);
+       if (rand2.length()<4)
+       {
+           retStr.append("0".repeat(4-rand2.length()));
+       }
+       retStr.append(rand2+"-");
        return retStr.toString();
 
    }
@@ -134,9 +142,30 @@ public class Database {
 
     //save the new json to the id
     public void saveChangeByID(String id , String newJSON) {
-//       String Address = getObjectByID(id);
-//       SaveFile(id,newJSON,Address);
-        //TODO
+        boolean isNumber = false;
+        try {
+            Integer.parseInt(id);
+            isNumber = true;
+        }catch (NumberFormatException e)
+        {
+            isNumber = false;
+        }
+        if (isNumber)
+        {
+            if (readFileToString(Paths.get(userAccountsDirectory.getAbsolutePath()+File.separator+id+".json"))!=null)
+            {
+                writeFileFromString(Paths.get(userAccountsDirectory.getAbsolutePath()+File.separator+id+".json"),newJSON);
+            }else if (readFileToString(Paths.get(ownerAccountsDirectory.getAbsolutePath()+File.separator+id+".json"))!=null){
+                writeFileFromString(Paths.get(ownerAccountsDirectory.getAbsolutePath()+File.separator+id+".json"),newJSON);
+            }
+            else
+                System.out.println("error no such user exists in database");
+
+        }else
+        {
+            //if it exists it changes the value else it creates the value
+            createNewObj(id,newJSON);
+        }
     }
 
     //creating a new object based on id and saving it in our database

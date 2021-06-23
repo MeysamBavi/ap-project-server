@@ -33,8 +33,21 @@ public class UserHandler extends ClientHandler{
                     writeString("please create your account first !");
                 }
             }
-            //order(*)userID(*)newJson
+            //order(*)userID(*)newJson(*)OwnerID(*)newOWnerJSON(*)orderID(*)orderJSON
+            else if (AnalyzableCommand[0].equals("Order"))
+            {
+                database.saveChangeByID(AnalyzableCommand[1] , AnalyzableCommand[2]);
+                writeString("Order added to User list");
+                database.saveChangeByID(AnalyzableCommand[3] , AnalyzableCommand[4]);
+                writeString("Order added to Owner list");
+                database.saveChangeByID(AnalyzableCommand[5],AnalyzableCommand[6]);
+                writeString("order added to orders database");
+            }
+            //
+            else if (AnalyzableCommand[0].equals("Reorder"))
+            {
 
+            }
             //credit(*)userID(*)newJson
             else if (AnalyzableCommand[0].equals("Credit"))
             {
@@ -67,7 +80,6 @@ public class UserHandler extends ClientHandler{
                     writeString("discount completed!");
                 }
             }
-
         } catch (Exception e) {
             e.printStackTrace();
         }

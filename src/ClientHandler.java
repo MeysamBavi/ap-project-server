@@ -32,7 +32,7 @@ public abstract class ClientHandler extends Thread {
     }
 
     void Serialize(String prefix) throws IOException {
-        String serializedCode = Database.GenerateID(prefix);
+        String serializedCode = database.GenerateID(prefix);
         writeString(serializedCode);
     }
 
