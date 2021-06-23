@@ -6,6 +6,8 @@ import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.Semaphore;
 import com.google.gson.Gson;
 
 public class Database {
@@ -19,6 +21,8 @@ public class Database {
     private File discountsDirectory;
     private File loginDataFile;
     private Map<String, String> loginData;
+    private Map<String, Semaphore> locks;
+    private final int MAX_PERMITS = 10;
     private Gson gson = new Gson();
 
     public Database(String directory) {
@@ -29,6 +33,7 @@ public class Database {
         }
         mainDirectory = dir;
         createSubDirectories();
+        locks = new ConcurrentHashMap<>();
     }
 
    public static String GenerateID(String prefix)
@@ -69,7 +74,7 @@ public class Database {
         }
         loginData = gson.fromJson(readFileToString(loginDataFile.toPath()), Map.class);
         if (loginData == null) {
-            loginData = new HashMap<>();
+            loginData = new ConcurrentHashMap<>();
         }
     }
 
@@ -179,41 +184,42 @@ public class Database {
     }
 
     //if doesn't exist, this returns null
-    private static String readFileToString(Path path) {
-        while (path.toString().endsWith(".tmp"))
-        {
-        }
-        File mainFile = new File(path.toString());
-        File tmpFile = new File(path.toString()+".tmp");
-        mainFile.renameTo(tmpFile);
+    private String readFileToString(Path path) {
+        String result = null;
+        Semaphore semaphore = getFileLock(path);
         try {
-            String retValue =  Files.readString(path, StandardCharsets.US_ASCII);
-            File mainFile2 = new File(path.toString());
-            tmpFile.renameTo(mainFile2);
-            return retValue;
-        } catch (IOException e) {
+            semaphore.acquire();
+            result = Files.readString(path, StandardCharsets.US_ASCII);
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
-            return null;
+        } finally {
+            semaphore.release();
         }
+        return result;
     }
 
     //a util function to write a string to a file
     //make sure that path exists, otherwise nothing happens
-    private static void writeFileFromString(Path path, String data) {
-
-        while(path.toString().endsWith(".tmp"))
-        {
-        }
-        File mainFile = new File(path.toString());
-        File tmpFile = new File(path.toString()+".tmp");
-        mainFile.renameTo(tmpFile);
+    private void writeFileFromString(Path path, String data) {
+        Semaphore semaphore = getFileLock(path);
         try {
+            semaphore.acquire(MAX_PERMITS);
             Files.writeString(path, data);
-            File mainFile2 = new File(path.toString());
-            tmpFile.renameTo(mainFile2);
-        } catch (IOException e) {
+        } catch (IOException | InterruptedException e) {
             e.printStackTrace();
+        } finally {
+            semaphore.release(MAX_PERMITS);
         }
+    }
+
+    private Semaphore getFileLock(Path path) {
+        String absolutePath = path.toAbsolutePath().toString();
+        Semaphore semaphore = locks.get(absolutePath);
+        if (semaphore == null) {
+            semaphore = new Semaphore(MAX_PERMITS, true);
+            locks.put(absolutePath, semaphore);
+        }
+        return semaphore;
     }
 
     public void search(SearchQuery<Restaurant> searchQuery) {
