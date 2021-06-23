@@ -1,13 +1,7 @@
 import com.google.gson.Gson;
-import com.google.gson.reflect.TypeToken;
-
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Type;
 import java.net.Socket;
-import java.util.ArrayList;
-import java.util.Map;
 
 public class UserHandler extends ClientHandler{
 
@@ -22,10 +16,10 @@ public class UserHandler extends ClientHandler{
             String Command = readString();
             String[] AnalyzableCommand = Command.split(separator);
             Gson gson = new Gson();
-            //Signup(*)Phonenumber(*)JSON
+            //Signup(*)Phonenumber(*)Password(*)JSON
             if (AnalyzableCommand[0].equals("Signup"))
             {
-                database.createNewObj(AnalyzableCommand[1],true,AnalyzableCommand[2]);
+                database.createNewObj(AnalyzableCommand[1],AnalyzableCommand[2],true,AnalyzableCommand[3]);
                 writeString("User added to the server");
             }
             //Login(*)Phonenumber
@@ -47,7 +41,6 @@ public class UserHandler extends ClientHandler{
                 database.saveChangeByID(AnalyzableCommand[1],AnalyzableCommand[2]);
                 writeString("Credit added successfully");
             }
-
             //AddAddress(*)userID(*)newJson
             else if (AnalyzableCommand[0].equals("Address"))
             {

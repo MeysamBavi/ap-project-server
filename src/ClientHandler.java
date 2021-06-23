@@ -21,6 +21,11 @@ public abstract class ClientHandler extends Thread {
         this.dos = dos;
     }
 
+    void Serialize(String prefix) throws IOException {
+        String serializedCode = Database.GenerateID(prefix);
+        writeString(serializedCode);
+    }
+
     String readString() throws IOException {
         return new String(dis.readNBytes(dis.readInt()));
     }

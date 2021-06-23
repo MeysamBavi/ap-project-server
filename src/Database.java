@@ -4,6 +4,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 import com.google.gson.Gson;
 
@@ -29,6 +30,20 @@ public class Database {
         mainDirectory = dir;
         createSubDirectories();
     }
+
+   public static String GenerateID(String prefix)
+   {
+       StringBuilder retStr = new StringBuilder();
+       retStr.append(prefix+"-");
+       Object rndNum = new Object();
+       retStr.append(Integer.toString(rndNum.hashCode(),16).substring(0,4).toUpperCase(Locale.ROOT));
+       retStr.append("-");
+       retStr.append(Integer.toString(rndNum.hashCode(),16).substring(4,8).toUpperCase(Locale.ROOT));
+
+
+       return retStr.toString();
+
+   }
 
     // creates sub directories. if they already exist, nothing happens.
     private void createSubDirectories() {
