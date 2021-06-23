@@ -180,8 +180,17 @@ public class Database {
 
     //if doesn't exist, this returns null
     private static String readFileToString(Path path) {
+        while (path.toString().endsWith(".tmp"))
+        {
+        }
+        File mainFile = new File(path.toString());
+        File tmpFile = new File(path.toString()+".tmp");
+        mainFile.renameTo(tmpFile);
         try {
-            return Files.readString(path, StandardCharsets.US_ASCII);
+            String retValue =  Files.readString(path, StandardCharsets.US_ASCII);
+            File mainFile2 = new File(path.toString());
+            tmpFile.renameTo(mainFile2);
+            return retValue;
         } catch (IOException e) {
             e.printStackTrace();
             return null;
@@ -191,9 +200,17 @@ public class Database {
     //a util function to write a string to a file
     //make sure that path exists, otherwise nothing happens
     private static void writeFileFromString(Path path, String data) {
-        //TODO lock the file with lock system
+
+        while(path.toString().endsWith(".tmp"))
+        {
+        }
+        File mainFile = new File(path.toString());
+        File tmpFile = new File(path.toString()+".tmp");
+        mainFile.renameTo(tmpFile);
         try {
             Files.writeString(path, data);
+            File mainFile2 = new File(path.toString());
+            tmpFile.renameTo(mainFile2);
         } catch (IOException e) {
             e.printStackTrace();
         }
