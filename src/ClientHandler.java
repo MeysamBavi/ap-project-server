@@ -55,6 +55,7 @@ public abstract class ClientHandler extends Thread {
 
     //1: file not found
     //2: wrong password / username
+    //3: duplicate phonenumber
     public String getError(int errorCode) {
         return "Error " + errorCode;
     }

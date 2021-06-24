@@ -2,6 +2,8 @@ import com.google.gson.Gson;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 
 public class UserHandler extends ClientHandler{
 
@@ -12,76 +14,143 @@ public class UserHandler extends ClientHandler{
 
     @Override
     public void run() {
-        try {
-            String Command = readString();
-            String[] AnalyzableCommand = Command.split(separator);
-            Gson gson = new Gson();
-            //Signup(*)Phonenumber(*)Password(*)JSON
-            if (AnalyzableCommand[0].equals("Signup"))
-            {
-                database.createNewObj(AnalyzableCommand[1],AnalyzableCommand[2],true,AnalyzableCommand[3]);
-                writeString("User added to the server");
-            }
-            //Login(*)Phonenumber(*)Password
-            else if (AnalyzableCommand[0].equals("Login"))
-            {
-                if (database.checkPassword(AnalyzableCommand[1] , AnalyzableCommand[2]))
-                {
-                    writeString(database.getJson(AnalyzableCommand[1],true));
-                }else
-                {
-                    writeString("please create your account first !");
-                }
-            }
-            //order(*)userID(*)newJson(*)OwnerID(*)newOWnerJSON(*)orderID(*)orderJSON
-            else if (AnalyzableCommand[0].equals("Order"))
-            {
-                database.saveChangeByID(AnalyzableCommand[1] , AnalyzableCommand[2]);
-                writeString("Order added to User list");
-                database.saveChangeByID(AnalyzableCommand[3] , AnalyzableCommand[4]);
-                writeString("Order added to Owner list");
-                database.saveChangeByID(AnalyzableCommand[5],AnalyzableCommand[6]);
-                writeString("order added to orders database");
-            }
-            //
-            else if (AnalyzableCommand[0].equals("Reorder"))
-            {
+        boolean isDone = false;
+        while (!isDone) {
+            try {
 
-            }
-            //credit(*)userID(*)newJson
-            else if (AnalyzableCommand[0].equals("Credit"))
-            {
-                database.saveChangeByID(AnalyzableCommand[1],AnalyzableCommand[2]);
-                writeString("Credit added successfully");
-            }
-            //AddAddress(*)userID(*)newJson
-            else if (AnalyzableCommand[0].equals("Address"))
-            {
-                database.saveChangeByID(AnalyzableCommand[1] , AnalyzableCommand[2]);
-                writeString("Address added/edited successfully");
-            }
-            //Comment(*)UserID(*)UserJSON(*)RestaurantID(*)RestaurantsJSON(*)CommentID(*)CommentJSON
-            else if (AnalyzableCommand[0].equals("Comment"))
-            {
-                database.saveChangeByID(AnalyzableCommand[1] , AnalyzableCommand[2]);
-                writeString("Comment added to User Comments");
-                database.saveChangeByID(AnalyzableCommand[3] , AnalyzableCommand[4]);
-                writeString("Comment added to Restaurant Comments");
-                database.saveChangeByID(AnalyzableCommand[5] , AnalyzableCommand[6]);
-                writeString("Comment added to Database");
-            }
-            //Discount(*)Discountcode(*)OrderID(*)OrderJSON
-            else if (AnalyzableCommand[0].equals("Discount"))
-            {
-                if (database.getDiscountJson(AnalyzableCommand[1]) != null)
+                String Command = readString();
+                String[] AnalyzableCommand = Command.split(separator);
+                String Response = null;
+                Gson gson = new Gson();
+                switch (AnalyzableCommand[0])
                 {
-                    writeString("Discount");
-                    database.saveChangeByID(AnalyzableCommand[2],AnalyzableCommand[3]);
-                    writeString("discount completed!");
+                    case "Signup" :
+                        Response = signup(AnalyzableCommand);
+                        break;
+                    case "Serialize" :
+                        Response = serialize(AnalyzableCommand);
+                        break;
+                    case "Login" :
+                        Response = login(AnalyzableCommand);
+                        break;
+                    case "Order" :
+                        Response = order(AnalyzableCommand);
+                        break;
+                    case "Credit" :
+                        Response = credit(AnalyzableCommand);
+                        break;
+                    case "Address" :
+                        Response = address(AnalyzableCommand);
+                        break;
+                    case "Comment" :
+                        Response = comment(AnalyzableCommand);
+                        break;
+                    case "Search" :
+                        Response = search(AnalyzableCommand);
+                        break;
+                    case "Recommended" :
+                        Response = recommended(AnalyzableCommand);
+                        break;
+                    case  "Discount" :
+                        Response = discount(AnalyzableCommand);
+                        break;
                 }
+                writeString(Response == null ? "null" : Response);
+            } catch (Exception e) {
+                e.printStackTrace();
+                try {
+                    endConnection();
+                }catch (Exception x)
+                {
+                    x.printStackTrace();
+                }
+                isDone = true;
             }
-        } catch (Exception e) {
-            e.printStackTrace();
         }
+    }
+    //Signup(*)Phonenumber(*)Password(*)JSON
+    private String signup(String[] ac){
+        if (database.isPhoneNumberUnique(ac[1])) {
+            database.createNewObj(ac[1], ac[2], true, ac[3]);
+            return String.valueOf(true);
+        }
+
+        return getError(3);
+    }
+    //order(*)userID(*)newJson(*)OwnerID(*)newOWnerJSON(*)orderID(*)orderJSON
+    //reorder has no difference with order :)
+    private String order(String[] ac)
+    {
+        database.saveChangeByID(ac[1], true, ac[2]);
+        database.saveChangeByID(ac[3],false, ac[4]);
+        database.saveChangeByID(ac[5], ac[6]);
+        return String.valueOf(true);
+    }
+    //credit(*)userID(*)newJson
+    private String credit(String[] ac)
+    {
+        database.saveChangeByID(ac[1],true, ac[2]);
+        return String.valueOf(true);
+    }
+    //AddAddress(*)userID(*)newJson
+    private String address(String[] ac)
+    {
+        database.saveChangeByID(ac[1],true, ac[2]);
+        return String.valueOf(true);
+    }
+    //Comment(*)UserID(*)UserJSON(*)RestaurantID(*)RestaurantsJSON(*)CommentID(*)CommentJSON
+    private String comment(String[] ac)
+    {
+        database.saveChangeByID(ac[1],true, ac[2]);
+        database.saveChangeByID(ac[3], ac[4]);
+        database.createNewObj(ac[5], ac[6]);
+        return String.valueOf(true);
+    }
+    //Search(*)name
+    private String search(String[] ac){
+        RestaurantPredicate searchPredicate = new RestaurantPredicate(ac[1]);
+        SearchQuery<Restaurant> searchQuery = new SearchQuery<Restaurant>(searchPredicate.generate());
+        database.search(searchQuery);
+        Restaurant[] listOfRestaurants = searchQuery.getValue();
+        String Json = toJson(listOfRestaurants);
+        return Json;
+    }
+    //Login(*)Phonenumber(*)Password
+    private String login(String[] ac){
+        if (database.checkPassword(ac[1],ac[2]))
+        {
+            return getError(2);
+        }
+        var map = jsonToMap(database.getJson(ac[1], true));
+
+        List<String> previousOrdersIDs = (List<String>) map.get("previousOrders");
+        final List<Object> previousOrders = new ArrayList<>(previousOrdersIDs.size());
+        previousOrdersIDs.forEach((e) -> previousOrders.add(jsonToObject(database.getJson(e))));
+        map.put("previousOrders", previousOrders);
+
+        List<String> activeOrdersIDs = (List<String>) jsonToMap(database.getActiveOrdersJson(ac[1])).get("activeOrders");
+        final List<Object> activeOrders = new ArrayList<>(activeOrdersIDs.size());
+        activeOrdersIDs.forEach((e) -> activeOrders.add(jsonToObject(database.getJson(e))));
+        map.put("activeOrders", activeOrders);
+
+        return toJson(map);
+    }
+    //ObjectType
+    private String serialize(String[] ac){
+        return database.generateID(ac[1]);
+    }
+    private String recommended(String[] ac)
+    {
+        // TODO
+        return "salam";
+    }
+    //Discount(*)Discountcode(*)OrderID(*)OrderJSON
+    private String discount(String[] ac)
+    {
+        if (database.getDiscountJson(ac[1]) != null) {
+            database.saveChangeByID(ac[2], ac[3]);
+            return String.valueOf(true);
+        }
+        return getError(1);
     }
 }
