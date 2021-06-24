@@ -57,6 +57,9 @@ public class OwnerHandler extends ClientHandler {
                     case "editComment":
                         response = editComment(analyzableCommand);
                         break;
+                    case "get":
+                        response = get(analyzableCommand);
+                        break;
                 }
                 writeString(response == null ? "null" : response);
             } catch (IOException e) {
@@ -121,16 +124,14 @@ public class OwnerHandler extends ClientHandler {
     //deliver [order id] {order object} [phoneNumber] {owner account} {active orders}
     private String deliver(String[] ac) {
         database.saveChangeByID(ac[1], ac[2]);
-//        TODO
-//        database.saveChangeByID(ac[3], false, ac[4]);
-//        database.saveActiveOrders(ac[3], ac[5]);
+        database.saveChangeByID(ac[3], false, ac[4]);
+        database.saveActiveOrders(ac[3], ac[5]);
         return String.valueOf(true);
     }
 
     //editFood [menu id] [food id] {food object}
     private String editFood(String[] ac) {
-//        TODO
-//        database.saveChangeByID(ac[1], ac[2], ac[3]);
+        database.saveChangeByID(ac[1], ac[2], ac[3]);
         return String.valueOf(true);
     }
 
@@ -168,5 +169,10 @@ public class OwnerHandler extends ClientHandler {
     private String editComment(String[] ac) {
         database.saveChangeByID(ac[1], ac[2]);
         return String.valueOf(true);
+    }
+
+    //get [object id]
+    private String get(String[] ac) {
+        return database.getJson(ac[1]);
     }
 }

@@ -154,32 +154,61 @@ public class Database {
     }
 
     //save the new json to the id
-    public void saveChangeByID(String id , String newJSON) {
-        boolean isNumber = false;
-        try {
-            Integer.parseInt(id);
-            isNumber = true;
-        }catch (NumberFormatException e)
-        {
-            isNumber = false;
+    public void saveChangeByID(String id, String newJSON) {
+        String directory = "";
+        switch (id.substring(0, 2)) {
+            case "O-":
+                directory = ordersDirectory.getAbsolutePath();
+                break;
+            case "R-":
+                directory = restaurantsDirectory.getAbsolutePath();
+                break;
+            case "M-":
+                directory = menusDirectory.getAbsolutePath() + File.separator + id;
+                break;
+            case "C-":
+                directory = commentsDirectory.getAbsolutePath();
+                break;
+            default:
+                return;
         }
-        if (isNumber)
-        {
-            if (readFileToString(Paths.get(userAccountsDirectory.getAbsolutePath()+File.separator+id+".json"))!=null)
-            {
-                writeFileFromString(Paths.get(userAccountsDirectory.getAbsolutePath()+File.separator+id+".json"),newJSON);
-            }else if (readFileToString(Paths.get(ownerAccountsDirectory.getAbsolutePath()+File.separator+id+".json"))!=null){
-                writeFileFromString(Paths.get(ownerAccountsDirectory.getAbsolutePath()+File.separator+id+".json"),newJSON);
-            }
-            else
-                System.out.println("error no such user exists in database");
-
-        }else
-        {
-            //if it exists it changes the value else it creates the value
-            createNewObj(id,newJSON);
-        }
+        writeFileFromString(Paths.get(directory + File.separator + id + ".json"), newJSON);
     }
+
+    public void saveChangeByID(String phoneNumber, boolean isUser, String newJSON) {
+        if (isUser) {
+            writeFileFromString(Paths.get(
+                    userAccountsDirectory.getAbsolutePath() +
+                            File.separator +
+                            phoneNumber +
+                            ".json"
+            ), newJSON);
+            return;
+        }
+        writeFileFromString(Paths.get(
+                ownerAccountsDirectory.getAbsolutePath() +
+                        File.separator +
+                        phoneNumber +
+                        File.separator +
+                        phoneNumber +
+                        ".json"
+        ), newJSON);
+    }
+
+    public void saveActiveOrders(String phoneNumber, String newJSON) {
+        writeFileFromString(Paths.get(
+                ownerAccountsDirectory.getAbsolutePath() +
+                        File.separator +
+                        phoneNumber +
+                        File.separator +
+                        "activeOrders.json"
+        ), newJSON);
+    }
+
+    public void saveChangeByID(String menuID, String foodID, String newJSON) {
+        writeFileFromString(Paths.get(menusDirectory.getAbsolutePath() + File.separator + menuID + File.separator + foodID + ".json"), newJSON);
+    }
+
 
     //creating a new object based on id and saving it in our database
     public void createNewObj(String id, String JSON) {
@@ -285,6 +314,20 @@ public class Database {
 
     public boolean checkPassword(String phoneNumber, String password) {
         return password.equals(loginData.get(phoneNumber));
+    }
+
+    public boolean isPhoneNumberUnique(String phoneNumber) {
+        File[] files = userAccountsDirectory.listFiles();
+        assert files != null;
+        for (File f : files) {
+            if (f.getName().contains(phoneNumber)) return false;
+        }
+        files = ownerAccountsDirectory.listFiles();
+        assert files != null;
+        for (File f : files) {
+            if (f.getName().contains(phoneNumber)) return false;
+        }
+        return true;
     }
 
 }
