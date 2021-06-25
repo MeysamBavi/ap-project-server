@@ -12,7 +12,7 @@ public abstract class ClientHandler extends Thread {
     private Socket socket;
     private DataOutputStream dos;
     private DataInputStream dis;
-    public static String separator = "|*|*|";
+    public static String separator = "\\|\\*\\|\\*\\|";
     private Gson gson;
     private final Type type = new TypeToken<Map<String, Object>>(){}.getType();
 

@@ -77,13 +77,13 @@ public class UserHandler extends ClientHandler{
 
         return getError(3);
     }
-    //order(*)userID(*)newJson(*)OwnerID(*)newOWnerJSON(*)orderID(*)orderJSON
+    //order(*)userID(*)newJson(*)orderID(*)orderJSON(*)restaurantID
     //reorder has no difference with order :)
     private String order(String[] ac)
     {
+        database.saveChangeByID(ac[3], ac[4]);
         database.saveChangeByID(ac[1], true, ac[2]);
-        database.saveChangeByID(ac[3],false, ac[4]);
-        database.saveChangeByID(ac[5], ac[6]);
+        database.addOrderToOwnerFile(ac[5], ac[3]);
         return String.valueOf(true);
     }
     //credit(*)userID(*)newJson
@@ -98,12 +98,12 @@ public class UserHandler extends ClientHandler{
         database.saveChangeByID(ac[1],true, ac[2]);
         return String.valueOf(true);
     }
-    //Comment(*)UserID(*)UserJSON(*)RestaurantID(*)RestaurantsJSON(*)CommentID(*)CommentJSON
+    //Comment(*)UserID(*)UserJSON(*)RestaurantID(*)CommentID(*)CommentJSON
     private String comment(String[] ac)
     {
+        database.createNewObj(ac[4], ac[5]);
         database.saveChangeByID(ac[1],true, ac[2]);
-        database.saveChangeByID(ac[3], ac[4]);
-        database.createNewObj(ac[5], ac[6]);
+        database.addCommentToRestaurantFile(ac[3], ac[4]);
         return String.valueOf(true);
     }
     //Search(*)name
@@ -112,12 +112,11 @@ public class UserHandler extends ClientHandler{
         SearchQuery<Restaurant> searchQuery = new SearchQuery<Restaurant>(searchPredicate.generate());
         database.search(searchQuery);
         Restaurant[] listOfRestaurants = searchQuery.getValue();
-        String Json = toJson(listOfRestaurants);
-        return Json;
+        return toJson(listOfRestaurants);
     }
     //Login(*)Phonenumber(*)Password
     private String login(String[] ac){
-        if (database.checkPassword(ac[1],ac[2]))
+        if (!database.checkPassword(ac[1],ac[2]))
         {
             return getError(2);
         }

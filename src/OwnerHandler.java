@@ -4,7 +4,6 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 public class OwnerHandler extends ClientHandler {
 
@@ -90,7 +89,7 @@ public class OwnerHandler extends ClientHandler {
         previousOrdersIDs.forEach((e) -> previousOrders.add(jsonToObject(database.getJson(e))));
         map.put("previousOrders", previousOrders);
 
-        List<String> activeOrdersIDs = (List<String>) jsonToMap(database.getActiveOrdersJson(ac[1])).get("activeOrders");
+        List<String> activeOrdersIDs = (List<String>) jsonToObject(database.getActiveOrdersJson(ac[1]));
         final List<Object> activeOrders = new ArrayList<>(activeOrdersIDs.size());
         activeOrdersIDs.forEach((e) -> activeOrders.add(jsonToObject(database.getJson(e))));
         map.put("activeOrders", activeOrders);
@@ -103,6 +102,7 @@ public class OwnerHandler extends ClientHandler {
     private String signUp(String[] ac) {
         database.createNewObj(ac[1], ac[2], false, ac[3]);
         database.createNewObj(ac[4], ac[5]);
+        database.addOwnerOf(ac[4], ac[1]);
         return String.valueOf(true);
     }
 
@@ -113,12 +113,10 @@ public class OwnerHandler extends ClientHandler {
 
     //activeOrders [phoneNumber], response: {json object with one field (activeOrders)}
     private String getActiveOrders(String[] ac) {
-        Map<String, Object> map = jsonToMap(database.getActiveOrdersJson(ac[1]));
-        List<String> activeOrdersIDs = (List<String>) map.get("activeOrders");
+        List<String> activeOrdersIDs = (List<String>) jsonToObject(database.getActiveOrdersJson(ac[1]));
         final List<Object> activeOrders = new ArrayList<>(activeOrdersIDs.size());
         activeOrdersIDs.forEach((e) -> activeOrders.add(jsonToObject(database.getJson(e))));
-        map.put("activeOrders", activeOrders);
-        return toJson(map);
+        return toJson(activeOrders);
     }
 
     //deliver [order id] {order object} [phoneNumber] {owner account} {active orders}
