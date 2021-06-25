@@ -3,7 +3,10 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import com.google.gson.Gson;
@@ -21,7 +24,7 @@ public class Database {
     private Map<String, String> loginData;
     private File ownerOfFile;
     private Map<String, String> ownerOf; //restaurantID to phoneNumber of owner
-    private Map<String, Semaphore> locks = new HashMap<>();
+    private final Map<String, Semaphore> locks;
     private final int MAX_PERMITS = 10;
     private Gson gson = new Gson();
 
@@ -32,9 +35,9 @@ public class Database {
             throw new RuntimeException("Not a directory.");
         }
         mainDirectory = dir;
+        this.locks = new ConcurrentHashMap<>();
         createSubDirectories();
         load(); // MUST be after createSubDirectories
-        locks = new ConcurrentHashMap<>();
     }
 
     // creates sub directories. if they already exist, nothing happens.
