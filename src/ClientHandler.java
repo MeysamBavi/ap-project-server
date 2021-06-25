@@ -13,7 +13,7 @@ public abstract class ClientHandler extends Thread {
     private DataOutputStream dos;
     private DataInputStream dis;
     public static String separator = "\\|\\*\\|\\*\\|";
-    private Gson gson;
+    private Gson gson = new Gson();
     private final Type type = new TypeToken<Map<String, Object>>(){}.getType();
 
     ClientHandler(Socket socket, Database database) throws IOException {

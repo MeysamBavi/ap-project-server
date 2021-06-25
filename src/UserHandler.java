@@ -17,41 +17,39 @@ public class UserHandler extends ClientHandler{
         boolean isDone = false;
         while (!isDone) {
             try {
-
                 String Command = readString();
                 String[] AnalyzableCommand = Command.split(separator);
                 String Response = null;
-                Gson gson = new Gson();
                 switch (AnalyzableCommand[0])
                 {
-                    case "Signup" :
+                    case "signup" :
                         Response = signup(AnalyzableCommand);
                         break;
-                    case "Serialize" :
+                    case "serialize" :
                         Response = serialize(AnalyzableCommand);
                         break;
-                    case "Login" :
+                    case "login" :
                         Response = login(AnalyzableCommand);
                         break;
-                    case "Order" :
+                    case "order" :
                         Response = order(AnalyzableCommand);
                         break;
-                    case "Credit" :
+                    case "credit" :
                         Response = credit(AnalyzableCommand);
                         break;
-                    case "Address" :
+                    case "address" :
                         Response = address(AnalyzableCommand);
                         break;
-                    case "Comment" :
+                    case "comment" :
                         Response = comment(AnalyzableCommand);
                         break;
-                    case "Search" :
+                    case "search" :
                         Response = search(AnalyzableCommand);
                         break;
-                    case "Recommended" :
+                    case "recommended" :
                         Response = recommended(AnalyzableCommand);
                         break;
-                    case  "Discount" :
+                    case  "discount" :
                         Response = discount(AnalyzableCommand);
                         break;
                 }
@@ -70,6 +68,7 @@ public class UserHandler extends ClientHandler{
     }
     //Signup(*)Phonenumber(*)Password(*)JSON
     private String signup(String[] ac){
+        System.out.println("salam");
         if (database.isPhoneNumberUnique(ac[1])) {
             database.createNewObj(ac[1], ac[2], true, ac[3]);
             return String.valueOf(true);
@@ -120,7 +119,7 @@ public class UserHandler extends ClientHandler{
         {
             return getError(2);
         }
-        var map = jsonToMap(database.getJson(ac[1], true));
+        /*var map = jsonToMap(database.getJson(ac[1], true));
 
         List<String> previousOrdersIDs = (List<String>) map.get("previousOrders");
         final List<Object> previousOrders = new ArrayList<>(previousOrdersIDs.size());
@@ -130,9 +129,9 @@ public class UserHandler extends ClientHandler{
         List<String> activeOrdersIDs = (List<String>) jsonToMap(database.getActiveOrdersJson(ac[1])).get("activeOrders");
         final List<Object> activeOrders = new ArrayList<>(activeOrdersIDs.size());
         activeOrdersIDs.forEach((e) -> activeOrders.add(jsonToObject(database.getJson(e))));
-        map.put("activeOrders", activeOrders);
+        map.put("activeOrders", activeOrders);*/
 
-        return toJson(map);
+        return database.getJson(ac[1],true);
     }
     //ObjectType
     private String serialize(String[] ac){

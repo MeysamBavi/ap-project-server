@@ -4,7 +4,7 @@ import java.net.Socket;
 
 public class Server {
     public static void main(String[] args) throws IOException{
-        ServerSocket ss = new ServerSocket(8080);
+        ServerSocket ss = new ServerSocket(8081);
         Database database = new Database("C:\\Users\\sinatb\\Desktop\\ap_final_project\\database");
         while (true)
         {

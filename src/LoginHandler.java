@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Locale;
 
 public class LoginHandler extends ClientHandler {
 
