@@ -3,6 +3,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
@@ -21,6 +22,8 @@ public class Database {
     private File discountsDirectory;
     private File loginDataFile;
     private Map<String, String> loginData;
+    private File ownerOfFile;
+    private Map<String, String> ownerOf; //restaurantID to phoneNumber of owner
     private Map<String, Semaphore> locks;
     private final int MAX_PERMITS = 10;
     private Gson gson = new Gson();
@@ -33,7 +36,49 @@ public class Database {
         }
         mainDirectory = dir;
         createSubDirectories();
+        load(); // MUST be after createSubDirectories
         locks = new ConcurrentHashMap<>();
+    }
+
+    // creates sub directories. if they already exist, nothing happens.
+    private void createSubDirectories() {
+        ordersDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "orders");
+        ordersDirectory.mkdir();
+        restaurantsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "restaurants");
+        restaurantsDirectory.mkdir();
+        menusDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "menus");
+        menusDirectory.mkdir();
+        commentsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "comments");
+        commentsDirectory.mkdir();
+        userAccountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "user-accounts");
+        userAccountsDirectory.mkdir();
+        ownerAccountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "owner-accounts");
+        ownerAccountsDirectory.mkdir();
+        discountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "discounts");
+        discountsDirectory.mkdir();
+        loginDataFile = new File(mainDirectory.getAbsolutePath() + File.separator + "loginData.json");
+        ownerOfFile = new File(mainDirectory.getAbsolutePath() + File.separator + "ownerOf.json");
+    }
+
+    private void load() {
+        try {
+            loginDataFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        loginData = gson.fromJson(readFileToString(loginDataFile.toPath()), Map.class);
+        if (loginData == null) {
+            loginData = new ConcurrentHashMap<>();
+        }
+        try {
+            ownerOfFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ownerOf = gson.fromJson(readFileToString(loginDataFile.toPath()), Map.class);
+        if (ownerOf == null) {
+            ownerOf = new ConcurrentHashMap<>();
+        }
     }
 
    public String generateID(String typeOfObject) {
@@ -69,34 +114,6 @@ public class Database {
         }
         return "X";
    }
-
-    // creates sub directories. if they already exist, nothing happens.
-    private void createSubDirectories() {
-        ordersDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "orders");
-        ordersDirectory.mkdir();
-        restaurantsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "restaurants");
-        restaurantsDirectory.mkdir();
-        menusDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "menus");
-        menusDirectory.mkdir();
-        commentsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "comments");
-        commentsDirectory.mkdir();
-        userAccountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "user-accounts");
-        userAccountsDirectory.mkdir();
-        ownerAccountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "owner-accounts");
-        ownerAccountsDirectory.mkdir();
-        discountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "discounts");
-        discountsDirectory.mkdir();
-        loginDataFile = new File(mainDirectory.getAbsolutePath() + File.separator + "loginData.json");
-        try {
-            loginDataFile.createNewFile();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        loginData = gson.fromJson(readFileToString(loginDataFile.toPath()), Map.class);
-        if (loginData == null) {
-            loginData = new ConcurrentHashMap<>();
-        }
-    }
 
     // returns json string to caller (probably server). server can modify object with gson or directly send it to client.
     public String getJson(String id) {
@@ -261,6 +278,22 @@ public class Database {
 
     public void removeDiscount(String code) {
         // TODO
+    }
+
+    public void addOwnerOf(String restaurantID, String phoneNumber) {
+        ownerOf.put(restaurantID, phoneNumber);
+        writeFileFromString(ownerOfFile.toPath(), gson.toJson(ownerOf));
+    }
+
+    public void addOrderToOwnerFile(String restaurantID, String orderID) {
+        String ownerPhoneNumber = ownerOf.get(restaurantID);
+        List<String> activeOrderIDs = (List<String>) gson.fromJson(getActiveOrdersJson(ownerPhoneNumber), Object.class);
+        activeOrderIDs.add(orderID);
+        saveActiveOrders(ownerPhoneNumber, gson.toJson(activeOrderIDs));
+    }
+
+    public void addCommentToRestaurantFile(String restaurantID, String commentID) {
+
     }
 
     //if doesn't exist, this returns null
