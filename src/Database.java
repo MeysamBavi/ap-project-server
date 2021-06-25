@@ -24,7 +24,7 @@ public class Database {
     private Map<String, String> loginData;
     private File ownerOfFile;
     private Map<String, String> ownerOf; //restaurantID to phoneNumber of owner
-    private Map<String, Semaphore> locks;
+    private final Map<String, Semaphore> locks;
     private final int MAX_PERMITS = 10;
     private Gson gson = new Gson();
 
@@ -35,9 +35,9 @@ public class Database {
             throw new RuntimeException("Not a directory.");
         }
         mainDirectory = dir;
+        this.locks = new ConcurrentHashMap<>();
         createSubDirectories();
         load(); // MUST be after createSubDirectories
-        locks = new ConcurrentHashMap<>();
     }
 
     // creates sub directories. if they already exist, nothing happens.
