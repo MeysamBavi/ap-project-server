@@ -293,7 +293,11 @@ public class Database {
     }
 
     public void addCommentToRestaurantFile(String restaurantID, String commentID) {
-
+        Map<String, Object> restaurant = gson.fromJson(getJson(restaurantID), Map.class);
+        List<String> commentIDs = (List<String>) restaurant.get("commentIDs");
+        commentIDs.add(commentID);
+        restaurant.put("commentIDs", commentIDs);
+        saveChangeByID(restaurantID, gson.toJson(restaurant));
     }
 
     //if doesn't exist, this returns null
