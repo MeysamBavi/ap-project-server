@@ -39,12 +39,12 @@ public abstract class ClientHandler extends Thread {
         dos.writeBytes(data);
     }
 
-    UserHandler toUserHandler() {
-        return new UserHandler(socket, database, dis, dos);
+    UserHandler toUserHandler(String[] ac) {
+        return new UserHandler(socket, database, dis, dos, ac);
     }
 
-    OwnerHandler toOwnerHandler() {
-        return new OwnerHandler(socket, database, dis, dos);
+    OwnerHandler toOwnerHandler(String[] ac) {
+        return new OwnerHandler(socket, database, dis, dos, ac);
     }
 
     void endConnection() throws IOException {

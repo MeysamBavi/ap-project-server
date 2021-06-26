@@ -1,5 +1,6 @@
 import java.io.*;
 import java.net.Socket;
+import java.util.Arrays;
 import java.util.Locale;
 
 public class LoginHandler extends ClientHandler {
@@ -11,12 +12,14 @@ public class LoginHandler extends ClientHandler {
     @Override
     public void run() {
         try {
+            //[user or owner](*){rest of the commands}
             String message = readString();
-            if (message.equals("user")) {
-                Thread userHandler = toUserHandler();
+            String[] analyzableCommand = message.split(separator);
+            if (analyzableCommand[0].equals("user")) {
+                Thread userHandler = toUserHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
                 userHandler.start();
-            } else if (message.equals("owner")) {
-                Thread ownerHandler = toUserHandler();
+            } else if (analyzableCommand[0].equals("owner")) {
+                Thread ownerHandler = toUserHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
                 ownerHandler.start();
             } else {
                 //close streams and terminate connection

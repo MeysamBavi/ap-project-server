@@ -7,9 +7,12 @@ import java.util.List;
 
 public class UserHandler extends ClientHandler{
 
-    UserHandler(Socket s , Database d , DataInputStream dis , DataOutputStream dos)
+    private final String[] AnalyzableCommand;
+
+    UserHandler(Socket s , Database d , DataInputStream dis , DataOutputStream dos, String[] AnalyzableCommand)
     {
         super(s,d,dis,dos);
+        this.AnalyzableCommand = AnalyzableCommand;
     }
 
     @Override
@@ -17,8 +20,8 @@ public class UserHandler extends ClientHandler{
         boolean isDone = false;
         while (!isDone) {
             try {
-                String Command = readString();
-                String[] AnalyzableCommand = Command.split(separator);
+//                String Command = readString();
+//                String[] AnalyzableCommand = Command.split(separator);
                 String Response = null;
                 switch (AnalyzableCommand[0])
                 {
@@ -54,14 +57,9 @@ public class UserHandler extends ClientHandler{
                         break;
                 }
                 writeString(Response == null ? "null" : Response);
+                endConnection();
             } catch (Exception e) {
                 e.printStackTrace();
-                try {
-                    endConnection();
-                }catch (Exception x)
-                {
-                    x.printStackTrace();
-                }
                 isDone = true;
             }
         }
@@ -119,19 +117,19 @@ public class UserHandler extends ClientHandler{
         {
             return getError(2);
         }
-        /*var map = jsonToMap(database.getJson(ac[1], true));
+        var map = jsonToMap(database.getJson(ac[1], true));
 
         List<String> previousOrdersIDs = (List<String>) map.get("previousOrders");
         final List<Object> previousOrders = new ArrayList<>(previousOrdersIDs.size());
         previousOrdersIDs.forEach((e) -> previousOrders.add(jsonToObject(database.getJson(e))));
         map.put("previousOrders", previousOrders);
 
-        List<String> activeOrdersIDs = (List<String>) jsonToMap(database.getActiveOrdersJson(ac[1])).get("activeOrders");
+        List<String> activeOrdersIDs = (List<String>) map.get("activeOrders");
         final List<Object> activeOrders = new ArrayList<>(activeOrdersIDs.size());
         activeOrdersIDs.forEach((e) -> activeOrders.add(jsonToObject(database.getJson(e))));
-        map.put("activeOrders", activeOrders);*/
+        map.put("activeOrders", activeOrders);
 
-        return database.getJson(ac[1],true);
+        return toJson(map);
     }
     //ObjectType
     private String serialize(String[] ac){
@@ -150,5 +148,15 @@ public class UserHandler extends ClientHandler{
             return String.valueOf(true);
         }
         return getError(1);
+    }
+
+    //get(*)objectID
+    private String get(String[] ac) {
+        return database.getJson(ac[1]);
+    }
+
+    //getFood(*)menuID(*)foodID
+    private String getFood(String[] ac) {
+        return database.getJson(ac[1], ac[2]);
     }
 }

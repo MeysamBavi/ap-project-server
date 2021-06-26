@@ -7,8 +7,11 @@ import java.util.List;
 
 public class OwnerHandler extends ClientHandler {
 
-    OwnerHandler(Socket socket, Database database, DataInputStream dis, DataOutputStream dos) {
+    private final String[] analyzableCommand;
+
+    OwnerHandler(Socket socket, Database database, DataInputStream dis, DataOutputStream dos, String[] analyzableCommand) {
         super(socket, database, dis, dos);
+        this.analyzableCommand = analyzableCommand;
     }
 
     @Override
@@ -16,8 +19,8 @@ public class OwnerHandler extends ClientHandler {
         boolean shouldEnd = false;
         while (!shouldEnd) {
             try {
-                String command = readString();
-                String[] analyzableCommand = command.split(separator);
+//                String command = readString();
+//                String[] analyzableCommand = command.split(separator);
                 String response = null;
                 switch (analyzableCommand[0]) {
                     case "login":
@@ -61,13 +64,9 @@ public class OwnerHandler extends ClientHandler {
                         break;
                 }
                 writeString(response == null ? "null" : response);
+                endConnection();
             } catch (IOException e) {
                 e.printStackTrace();
-                try {
-                    endConnection();
-                } catch (IOException ioException) {
-                    ioException.printStackTrace();
-                }
                 shouldEnd = true;
             }
         }
