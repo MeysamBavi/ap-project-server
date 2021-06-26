@@ -97,8 +97,10 @@ public class OwnerHandler extends ClientHandler {
     }
 
     //signup [phoneNumber] [password] {owner account} [restaurantID] {restaurant object}
-    // assuming phoneNumber is unique
     private String signUp(String[] ac) {
+        if (!database.isPhoneNumberUnique(ac[1])) {
+            return getError(3);
+        }
         database.createNewObj(ac[1], ac[2], false, ac[3]);
         database.createNewObj(ac[4], ac[5]);
         database.addOwnerOf(ac[4], ac[1]);
@@ -170,6 +172,7 @@ public class OwnerHandler extends ClientHandler {
 
     //get [object id]
     private String get(String[] ac) {
-        return database.getJson(ac[1]);
+        String json =  database.getJson(ac[1]);
+        return json == null ? getError(1) : json;
     }
 }

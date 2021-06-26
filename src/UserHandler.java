@@ -55,6 +55,9 @@ public class UserHandler extends ClientHandler{
                     case  "discount" :
                         Response = discount(AnalyzableCommand);
                         break;
+                    case "useDiscount":
+                        Response = useDiscount(AnalyzableCommand);
+                        break;
                     case "get":
                         Response = get(AnalyzableCommand);
                         break;
@@ -70,9 +73,8 @@ public class UserHandler extends ClientHandler{
             }
         }
     }
-    //Signup(*)Phonenumber(*)Password(*)JSON
+    //signup(*)PhoneNumber(*)Password(*)JSON
     private String signup(String[] ac){
-        System.out.println("salam");
         if (database.isPhoneNumberUnique(ac[1])) {
             database.createNewObj(ac[1], ac[2], true, ac[3]);
             return String.valueOf(true);
@@ -95,13 +97,13 @@ public class UserHandler extends ClientHandler{
         database.saveChangeByID(ac[1],true, ac[2]);
         return String.valueOf(true);
     }
-    //AddAddress(*)userID(*)newJson
+    //address(*)userID(*)newJson
     private String address(String[] ac)
     {
         database.saveChangeByID(ac[1],true, ac[2]);
         return String.valueOf(true);
     }
-    //Comment(*)UserID(*)UserJSON(*)RestaurantID(*)CommentID(*)CommentJSON
+    //comment(*)UserID(*)UserJSON(*)RestaurantID(*)CommentID(*)CommentJSON
     private String comment(String[] ac)
     {
         database.createNewObj(ac[4], ac[5]);
@@ -109,7 +111,7 @@ public class UserHandler extends ClientHandler{
         database.addCommentToRestaurantFile(ac[3], ac[4]);
         return String.valueOf(true);
     }
-    //Search(*){restaurant predicate json}
+    //search(*){restaurant predicate json}
     private String search(String[] ac){
         RestaurantPredicate searchPredicate = jsonToRestaurantPredicate(ac[1]);
         SearchQuery<Restaurant> searchQuery = new SearchQuery<Restaurant>(searchPredicate.generate());
@@ -117,7 +119,7 @@ public class UserHandler extends ClientHandler{
         Restaurant[] listOfRestaurants = searchQuery.getValue();
         return toJson(listOfRestaurants);
     }
-    //Login(*)Phonenumber(*)Password
+    //login(*)PhoneNumber(*)Password
     private String login(String[] ac){
         if (!database.checkPassword(ac[1],ac[2]))
         {
@@ -146,10 +148,12 @@ public class UserHandler extends ClientHandler{
     private String recommended(String[] ac) {
         return database.getAllRestaurants(Integer.parseInt(ac[1]));
     }
-    //Discount(*)Discountcode
+
+    //Discount(*)code
     private String discount(String[] ac)
     {
-        return database.getDiscountJson(ac[1]);
+        String json = database.getDiscountJson(ac[1]);
+        return json == null ? getError(1) : json;
     }
 
     //useDiscount(*)code
@@ -160,11 +164,13 @@ public class UserHandler extends ClientHandler{
 
     //get(*)objectID
     private String get(String[] ac) {
-        return database.getJson(ac[1]);
+        String json =  database.getJson(ac[1]);
+        return json == null ? getError(1) : json;
     }
 
     //getFood(*)menuID(*)foodID
     private String getFood(String[] ac) {
-        return database.getJson(ac[1], ac[2]);
+        String json =  database.getJson(ac[1], ac[2]);
+        return json == null ? getError(1) : json;
     }
 }
