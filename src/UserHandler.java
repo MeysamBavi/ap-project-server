@@ -55,6 +55,12 @@ public class UserHandler extends ClientHandler{
                     case  "discount" :
                         Response = discount(AnalyzableCommand);
                         break;
+                    case "get":
+                        Response = get(AnalyzableCommand);
+                        break;
+                    case "getFood":
+                        Response = getFood(AnalyzableCommand);
+                        break;
                 }
                 writeString(Response == null ? "null" : Response);
                 endConnection();
