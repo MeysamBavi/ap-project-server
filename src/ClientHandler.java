@@ -72,4 +72,8 @@ public abstract class ClientHandler extends Thread {
         return gson.toJson(o);
     }
 
+    public RestaurantPredicate jsonToRestaurantPredicate(String json) {
+        return gson.fromJson(json, RestaurantPredicate.class);
+    }
+
 }

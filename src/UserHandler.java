@@ -109,9 +109,9 @@ public class UserHandler extends ClientHandler{
         database.addCommentToRestaurantFile(ac[3], ac[4]);
         return String.valueOf(true);
     }
-    //Search(*)name
+    //Search(*){restaurant predicate json}
     private String search(String[] ac){
-        RestaurantPredicate searchPredicate = new RestaurantPredicate(ac[1]);
+        RestaurantPredicate searchPredicate = jsonToRestaurantPredicate(ac[1]);
         SearchQuery<Restaurant> searchQuery = new SearchQuery<Restaurant>(searchPredicate.generate());
         database.search(searchQuery);
         Restaurant[] listOfRestaurants = searchQuery.getValue();
@@ -137,14 +137,14 @@ public class UserHandler extends ClientHandler{
 
         return toJson(map);
     }
-    //ObjectType
+    //serialize(*)[ObjectType]
     private String serialize(String[] ac){
         return database.generateID(ac[1]);
     }
-    private String recommended(String[] ac)
-    {
-        // TODO
-        return "salam";
+
+    //recommended(*)count
+    private String recommended(String[] ac) {
+        return database.getAllRestaurants(Integer.parseInt(ac[1]));
     }
     //Discount(*)Discountcode
     private String discount(String[] ac)

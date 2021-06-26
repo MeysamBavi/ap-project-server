@@ -1,3 +1,4 @@
+import java.util.List;
 
 public class Restaurant {
     String ID;
@@ -6,6 +7,6 @@ public class Restaurant {
     Address address;
     double areaOfDispatch;
     double score;
-    String[] commentIDs;
-    String[] foodCategories;
+    List<String> commentIDs;
+    List<String> foodCategories;
 }

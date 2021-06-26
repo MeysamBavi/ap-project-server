@@ -3,10 +3,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.Random;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import com.google.gson.Gson;
@@ -277,7 +274,7 @@ public class Database {
     }
 
     public void removeDiscount(String code) {
-        // TODO
+        deleteFile(Paths.get(discountsDirectory.getAbsolutePath() + File.separator + code + ".json"));
     }
 
     public void addOwnerOf(String restaurantID, String phoneNumber) {
@@ -329,6 +326,18 @@ public class Database {
         }
     }
 
+    private void deleteFile(Path path) {
+        Semaphore semaphore = getFileLock(path);
+        try {
+            semaphore.acquire(MAX_PERMITS);
+            Files.delete(path);
+        } catch (IOException | InterruptedException e) {
+            e.printStackTrace();
+        } finally {
+            semaphore.release(MAX_PERMITS);
+        }
+    }
+
     private Semaphore getFileLock(Path path) {
         String absolutePath = path.toAbsolutePath().toString();
         Semaphore semaphore = locks.get(absolutePath);
@@ -347,6 +356,19 @@ public class Database {
             searchQuery.feed(restaurant);
         }
         searchQuery.finish();
+    }
+
+    public String getAllRestaurants(int count) {
+        File[] files = restaurantsDirectory.listFiles();
+        assert files != null;
+        List<Restaurant> all = new ArrayList<>();
+        for (File file : files) {
+            Restaurant restaurant = gson.fromJson(readFileToString(file.toPath()), Restaurant.class);
+            all.add(restaurant);
+            count--;
+            if (count <= 0) break;
+        }
+        return gson.toJson(all);
     }
 
     public boolean checkPassword(String phoneNumber, String password) {
