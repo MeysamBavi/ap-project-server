@@ -146,14 +146,16 @@ public class UserHandler extends ClientHandler{
         // TODO
         return "salam";
     }
-    //Discount(*)Discountcode(*)OrderID(*)OrderJSON
+    //Discount(*)Discountcode
     private String discount(String[] ac)
     {
-        if (database.getDiscountJson(ac[1]) != null) {
-            database.saveChangeByID(ac[2], ac[3]);
-            return String.valueOf(true);
-        }
-        return getError(1);
+        return database.getDiscountJson(ac[1]);
+    }
+
+    //useDiscount(*)code
+    private String useDiscount(String[] ac) {
+        database.removeDiscount(ac[1]);
+        return String.valueOf(true);
     }
 
     //get(*)objectID
