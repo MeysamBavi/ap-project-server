@@ -28,7 +28,7 @@ public class SearchQuery<T> {
         }
     }
 
-    public T[] getValue() {
-        return value;
+    public List<T> getValue() {
+        return list;
     }
 }

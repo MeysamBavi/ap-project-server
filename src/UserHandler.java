@@ -76,8 +76,9 @@ public class UserHandler extends ClientHandler{
                 }
                 writeString(Response == null ? "null" : Response);
                 endConnection();
+                isDone = true;
             } catch (Exception e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 isDone = true;
             }
         }
@@ -124,7 +125,7 @@ public class UserHandler extends ClientHandler{
         RestaurantPredicate searchPredicate = jsonToRestaurantPredicate(ac[1]);
         SearchQuery<Restaurant> searchQuery = new SearchQuery<Restaurant>(searchPredicate.generate());
         database.search(searchQuery);
-        Restaurant[] listOfRestaurants = searchQuery.getValue();
+        List<Restaurant> listOfRestaurants = searchQuery.getValue();
         return toJson(listOfRestaurants);
     }
     //login(*)PhoneNumber(*)Password

@@ -80,8 +80,9 @@ public class OwnerHandler extends ClientHandler {
                 }
                 writeString(response == null ? "null" : response);
                 endConnection();
+                shouldEnd = true;
             } catch (IOException e) {
-                e.printStackTrace();
+//                e.printStackTrace();
                 shouldEnd = true;
             }
         }
