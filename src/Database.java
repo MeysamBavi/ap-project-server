@@ -272,6 +272,10 @@ public class Database {
         );
     }
 
+    public void removeFood(String menuID, String foodID) {
+        deleteFile(Paths.get(menusDirectory.getAbsolutePath() + File.separator + menuID + File.separator + foodID + ".json"));
+    }
+
     public String getDiscountJson(String code) {
         return readFileToString(Paths.get(discountsDirectory.getAbsolutePath() + File.separator + code + ".json"));
     }

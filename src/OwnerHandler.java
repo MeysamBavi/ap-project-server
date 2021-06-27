@@ -74,6 +74,9 @@ public class OwnerHandler extends ClientHandler {
                     case "getMenu":
                         response = getMenu(analyzableCommand);
                         break;
+                    case "removeFood":
+                        response = removeFood(analyzableCommand);
+                        break;
                 }
                 writeString(response == null ? "null" : response);
                 endConnection();
@@ -224,5 +227,11 @@ public class OwnerHandler extends ClientHandler {
             menuMap.put(category, foods);
         }
         return toJson(menuMap);
+    }
+
+    //removeFood [menuID] [foodID]
+    private String removeFood(String[] ac) {
+        database.removeFood(ac[1], ac[2]);
+        return String.valueOf(true);
     }
 }
