@@ -207,7 +207,11 @@ public class OwnerHandler extends ClientHandler {
 
     //getMenu [menu ID]
     private String getMenu(String[] ac) {
-        var menuMap = jsonToMap(database.getJson(ac[1]));
+        String json = database.getJson(ac[1]);
+        if (json == null) {
+            return getError(1);
+        }
+        var menuMap = jsonToMap(json);
         for (String category : menuMap.keySet()) {
             if (category.equals("ID")) continue;
             List<String> foodIDs = (List<String>) menuMap.get(category);
