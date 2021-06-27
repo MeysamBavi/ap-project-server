@@ -204,7 +204,11 @@ public class UserHandler extends ClientHandler{
             if (category.equals("ID")) continue;
             List<String> foodIDs = (List<String>) menuMap.get(category);
             List<Object> foods = new ArrayList<>(foodIDs.size());
-            foodIDs.forEach((e) -> foods.add(jsonToObject(database.getJson(ac[1], e))));
+            for (String id : foodIDs) {
+                String foodJson = database.getJson(ac[1], id);
+                if (foodJson == null) continue;
+                foods.add(jsonToObject(foodJson));
+            }
             menuMap.put(category, foods);
         }
         return toJson(menuMap);
