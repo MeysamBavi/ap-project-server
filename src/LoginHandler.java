@@ -19,7 +19,7 @@ public class LoginHandler extends ClientHandler {
                 Thread userHandler = toUserHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
                 userHandler.start();
             } else if (analyzableCommand[0].equals("owner")) {
-                Thread ownerHandler = toUserHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
+                Thread ownerHandler = toOwnerHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
                 ownerHandler.start();
             } else {
                 //close streams and terminate connection
