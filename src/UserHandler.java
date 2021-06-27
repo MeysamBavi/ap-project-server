@@ -64,6 +64,9 @@ public class UserHandler extends ClientHandler{
                     case "getFood":
                         Response = getFood(AnalyzableCommand);
                         break;
+                    case "isPhoneNumberUnique":
+                        Response = isPhoneNumberUnique(AnalyzableCommand);
+                        break;
                 }
                 writeString(Response == null ? "null" : Response);
                 endConnection();
@@ -79,7 +82,6 @@ public class UserHandler extends ClientHandler{
             database.createNewObj(ac[1], ac[2], true, ac[3]);
             return String.valueOf(true);
         }
-
         return getError(3);
     }
     //order(*)userID(*)newJson(*)orderID(*)orderJSON(*)restaurantID
@@ -172,5 +174,10 @@ public class UserHandler extends ClientHandler{
     private String getFood(String[] ac) {
         String json =  database.getJson(ac[1], ac[2]);
         return json == null ? getError(1) : json;
+    }
+
+//    isPhoneNumberUnique(*)[phoneNumber]
+    private String isPhoneNumberUnique(String[] ac) {
+        return String.valueOf(database.isPhoneNumberUnique(ac[1]));
     }
 }

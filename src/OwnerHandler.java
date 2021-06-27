@@ -62,6 +62,9 @@ public class OwnerHandler extends ClientHandler {
                     case "get":
                         response = get(analyzableCommand);
                         break;
+                    case "isPhoneNumberUnique":
+                        response = isPhoneNumberUnique(analyzableCommand);
+                        break;
                 }
                 writeString(response == null ? "null" : response);
                 endConnection();
@@ -174,5 +177,10 @@ public class OwnerHandler extends ClientHandler {
     private String get(String[] ac) {
         String json =  database.getJson(ac[1]);
         return json == null ? getError(1) : json;
+    }
+
+    //isPhoneNumberUnique [phoneNumber]
+    private String isPhoneNumberUnique(String[] ac) {
+        return String.valueOf(database.isPhoneNumberUnique(ac[1]));
     }
 }
