@@ -258,6 +258,7 @@ public class Database {
             File dir = new File(ownerAccountsDirectory.getAbsolutePath() + File.separator + phoneNumber);
             dir.mkdir();
             path = Paths.get(dir.getAbsolutePath() +  File.separator + phoneNumber + ".json");
+            writeFileFromString(Paths.get(dir.getAbsolutePath() + File.separator + "activeOrders.json"), "[]");
         }
         writeFileFromString(path, JSON);
     }

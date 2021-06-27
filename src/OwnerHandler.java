@@ -65,6 +65,12 @@ public class OwnerHandler extends ClientHandler {
                     case "isPhoneNumberUnique":
                         response = isPhoneNumberUnique(analyzableCommand);
                         break;
+                    case "save":
+                        response = save(analyzableCommand);
+                        break;
+                    case "saveFood":
+                        response = saveFood(analyzableCommand);
+                        break;
                 }
                 writeString(response == null ? "null" : response);
                 endConnection();
@@ -182,5 +188,17 @@ public class OwnerHandler extends ClientHandler {
     //isPhoneNumberUnique [phoneNumber]
     private String isPhoneNumberUnique(String[] ac) {
         return String.valueOf(database.isPhoneNumberUnique(ac[1]));
+    }
+
+    //save [object id] {json}
+    private String save(String[] ac) {
+        database.saveChangeByID(ac[1], ac[2]);
+        return String.valueOf(true);
+    }
+
+    //saveFood [menu ID] [food ID] {food json}
+    private String saveFood(String[] ac) {
+        database.saveChangeByID(ac[1], ac[2], ac[3]);
+        return String.valueOf(true);
     }
 }

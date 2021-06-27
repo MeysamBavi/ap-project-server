@@ -67,6 +67,9 @@ public class UserHandler extends ClientHandler{
                     case "isPhoneNumberUnique":
                         Response = isPhoneNumberUnique(AnalyzableCommand);
                         break;
+                    case "save":
+                        Response = save(AnalyzableCommand);
+                        break;
                 }
                 writeString(Response == null ? "null" : Response);
                 endConnection();
@@ -176,8 +179,14 @@ public class UserHandler extends ClientHandler{
         return json == null ? getError(1) : json;
     }
 
-//    isPhoneNumberUnique(*)[phoneNumber]
+    //isPhoneNumberUnique(*)[phoneNumber]
     private String isPhoneNumberUnique(String[] ac) {
         return String.valueOf(database.isPhoneNumberUnique(ac[1]));
+    }
+
+    //save(*)[object id](*){json}
+    private String save(String[] ac) {
+        database.saveChangeByID(ac[1], ac[2]);
+        return String.valueOf(true);
     }
 }
