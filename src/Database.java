@@ -179,6 +179,8 @@ public class Database {
                 break;
             case "M-":
                 directory = menusDirectory.getAbsolutePath() + File.separator + id;
+                File directory2 = new File(directory);
+                directory2.mkdir();
                 break;
             case "C-":
                 directory = commentsDirectory.getAbsolutePath();

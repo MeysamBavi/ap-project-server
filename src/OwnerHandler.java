@@ -71,6 +71,9 @@ public class OwnerHandler extends ClientHandler {
                     case "saveFood":
                         response = saveFood(analyzableCommand);
                         break;
+                    case "getMenu":
+                        response = getMenu(analyzableCommand);
+                        break;
                 }
                 writeString(response == null ? "null" : response);
                 endConnection();
@@ -200,5 +203,18 @@ public class OwnerHandler extends ClientHandler {
     private String saveFood(String[] ac) {
         database.saveChangeByID(ac[1], ac[2], ac[3]);
         return String.valueOf(true);
+    }
+
+    //getMenu [menu ID]
+    private String getMenu(String[] ac) {
+        var menuMap = jsonToMap(database.getJson(ac[1]));
+        for (String category : menuMap.keySet()) {
+            if (category.equals("ID")) continue;
+            List<String> foodIDs = (List<String>) menuMap.get(category);
+            List<Object> foods = new ArrayList<>(foodIDs.size());
+            foodIDs.forEach((e) -> foods.add(jsonToObject(database.getJson(ac[1], e))));
+            menuMap.put(category, foods);
+        }
+        return toJson(menuMap);
     }
 }
