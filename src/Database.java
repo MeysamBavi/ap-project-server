@@ -1,4 +1,5 @@
 import java.io.*;
+import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -7,6 +8,7 @@ import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
 import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 
 public class Database {
     private File mainDirectory;
@@ -24,6 +26,7 @@ public class Database {
     private final Map<String, Semaphore> locks;
     private final int MAX_PERMITS = 10;
     private Gson gson = new Gson();
+    private Type mapType = new TypeToken<Map<String, Object>>(){}.getType();
 
     public Database(String directory) {
         File dir = new File(directory);
@@ -72,9 +75,12 @@ public class Database {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ownerOf = gson.fromJson(readFileToString(loginDataFile.toPath()), Map.class);
-        if (ownerOf == null) {
-            ownerOf = new ConcurrentHashMap<>();
+        ownerOf = new ConcurrentHashMap<>();
+        Type type = new TypeToken<Map<String, String>>(){}.getType();
+        Map<String, String> ownerOfMap = gson.fromJson(readFileToString(ownerOfFile.toPath()), type);
+        if (ownerOfMap == null) return;
+        for (String key : ownerOfMap.keySet()) {
+            ownerOf.put(key, ownerOfMap.get(key));
         }
     }
 
@@ -117,8 +123,8 @@ public class Database {
         String directory = "";
         switch (id.substring(0, 2)) {
             case "O-":
-                directory = ordersDirectory.getAbsolutePath();
-                break;
+                directory = ordersDirectory.getAbsolutePath() + File.separator + id + ".json";
+                return getOrder(Paths.get(directory));
             case "R-":
                 directory = restaurantsDirectory.getAbsolutePath();
                 break;
@@ -132,6 +138,12 @@ public class Database {
                 return null;
         }
         return readFileToString(Paths.get(directory + File.separator + id + ".json"));
+    }
+
+    private String getOrder(Path path) {
+        Map<String, Object> order = gson.fromJson(readFileToString(path), mapType);
+        order.put("restaurant", gson.fromJson(getJson((String) order.get("restaurantID")), Object.class));
+        return gson.toJson(order);
     }
 
     public String getJson(String phoneNumber, boolean isUser) {
