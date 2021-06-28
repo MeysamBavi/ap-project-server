@@ -91,12 +91,14 @@ public class Database {
        Random random = new Random();
        String rand1 = Integer.toString(random.nextInt(0x10000),16).toUpperCase();
        if (rand1.length() < 4) {
-           result.insert(0, "0".repeat(4 - rand1.length()));
+//           result.insert(0, "0".repeat(4 - rand1.length()));
+           rand1 = "0".repeat(4 - rand1.length()) + rand1;
        }
        result.append(rand1).append("-");
        String rand2 = Integer.toString(random.nextInt(0x10000),16).toUpperCase(Locale.ROOT);
        if (rand2.length() < 4) {
-           result.insert(0, "0".repeat(4 - rand2.length()));
+//           result.insert(0, "0".repeat(4 - rand2.length()));
+           rand2 = "0".repeat(4 - rand2.length()) + rand2;
        }
        result.append(rand2);
        return result.toString();
