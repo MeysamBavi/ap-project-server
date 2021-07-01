@@ -48,8 +48,8 @@ public abstract class ClientHandler extends Thread {
     }
 
     void endConnection() throws IOException {
-        dis.close();
         dos.close();
+        dis.close();
         socket.close();
     }
 

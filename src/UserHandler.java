@@ -4,6 +4,7 @@ import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class UserHandler extends ClientHandler{
 
@@ -146,7 +147,14 @@ public class UserHandler extends ClientHandler{
         activeOrdersIDs.forEach((e) -> activeOrders.add(jsonToObject(database.getJson(e))));
         map.put("activeOrders", activeOrders);
 
-        return toJson(map);
+        List<Map<String, Object>> cart = (List<Map<String, Object>>) map.get("cart");
+
+        for (var cartItem : cart) {
+            cartItem.put("restaurant", jsonToObject(database.getJson((String) cartItem.get("restaurantID"))));
+            cartItem.remove("restaurantID");
+        }
+
+       return toJson(map);
     }
     //serialize(*)[ObjectType]
     private String serialize(String[] ac){
