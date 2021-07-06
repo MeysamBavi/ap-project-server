@@ -1,3 +1,5 @@
+package models;
+
 public class Address {
     double longitude;
     double latitude;

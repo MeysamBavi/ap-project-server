@@ -1,3 +1,5 @@
+package network;
+
 import java.io.*;
 import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
@@ -7,8 +9,10 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
-import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import models.Restaurant;
+import models.SearchQuery;
+import static util.JsonUtil.*;
 
 public class Database {
     private File mainDirectory;
@@ -25,8 +29,6 @@ public class Database {
     private Map<String, String> ownerOf; //restaurantID to phoneNumber of owner
     private final Map<String, Semaphore> locks;
     private final int MAX_PERMITS = 10;
-    private Gson gson = new Gson();
-    private Type mapType = new TypeToken<Map<String, Object>>(){}.getType();
 
     public Database(String directory) {
         File dir = new File(directory);
@@ -66,7 +68,7 @@ public class Database {
         } catch (IOException e) {
             e.printStackTrace();
         }
-        loginData = gson.fromJson(readFileToString(loginDataFile.toPath()), Map.class);
+        loginData = jsonToMapString(readFileToString(loginDataFile.toPath()));
         if (loginData == null) {
             loginData = new ConcurrentHashMap<>();
         }
@@ -77,7 +79,7 @@ public class Database {
         }
         ownerOf = new ConcurrentHashMap<>();
         Type type = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> ownerOfMap = gson.fromJson(readFileToString(ownerOfFile.toPath()), type);
+        Map<String, String> ownerOfMap = jsonToMapString(readFileToString(ownerOfFile.toPath()));
         if (ownerOfMap == null) return;
         for (String key : ownerOfMap.keySet()) {
             ownerOf.put(key, ownerOfMap.get(key));
@@ -143,9 +145,9 @@ public class Database {
     }
 
     private String getOrder(Path path) {
-        Map<String, Object> order = gson.fromJson(readFileToString(path), mapType);
-        order.put("restaurant", gson.fromJson(getJson((String) order.get("restaurantID")), Object.class));
-        return gson.toJson(order);
+        Map<String, Object> order = jsonToMap(readFileToString(path));
+        order.put("restaurant", jsonToObject(getJson((String) order.get("restaurantID"))));
+        return toJson(order);
     }
 
     public String getJson(String phoneNumber, boolean isUser) {
@@ -266,7 +268,7 @@ public class Database {
     //for signup
     public void createNewObj(String phoneNumber, String password, boolean isUser, String JSON) {
         loginData.put(phoneNumber, password);
-        writeFileFromString(loginDataFile.toPath(), gson.toJson(loginData));
+        writeFileFromString(loginDataFile.toPath(), toJson(loginData));
         Path path;
         if (isUser) {
             path = Paths.get(userAccountsDirectory.getAbsolutePath() + File.separator + phoneNumber + ".json");
@@ -300,22 +302,22 @@ public class Database {
 
     public void addOwnerOf(String restaurantID, String phoneNumber) {
         ownerOf.put(restaurantID, phoneNumber);
-        writeFileFromString(ownerOfFile.toPath(), gson.toJson(ownerOf));
+        writeFileFromString(ownerOfFile.toPath(), toJson(ownerOf));
     }
 
     public void addOrderToOwnerFile(String restaurantID, String orderID) {
         String ownerPhoneNumber = ownerOf.get(restaurantID);
-        List<String> activeOrderIDs = (List<String>) gson.fromJson(getActiveOrdersJson(ownerPhoneNumber), Object.class);
+        List<String> activeOrderIDs = (List<String>) jsonToObject(getActiveOrdersJson(ownerPhoneNumber));
         activeOrderIDs.add(orderID);
-        saveActiveOrders(ownerPhoneNumber, gson.toJson(activeOrderIDs));
+        saveActiveOrders(ownerPhoneNumber, toJson(activeOrderIDs));
     }
 
     public void addCommentToRestaurantFile(String restaurantID, String commentID) {
-        Map<String, Object> restaurant = gson.fromJson(getJson(restaurantID), Map.class);
+        Map<String, Object> restaurant = jsonToMap(getJson(restaurantID));
         List<String> commentIDs = (List<String>) restaurant.get("commentIDs");
         commentIDs.add(commentID);
         restaurant.put("commentIDs", commentIDs);
-        saveChangeByID(restaurantID, gson.toJson(restaurant));
+        saveChangeByID(restaurantID, toJson(restaurant));
     }
 
     //if doesn't exist, this returns null
@@ -373,7 +375,7 @@ public class Database {
         File[] files = restaurantsDirectory.listFiles();
         assert files != null;
         for (File file : files) {
-            Restaurant restaurant = gson.fromJson(readFileToString(file.toPath()), Restaurant.class);
+            Restaurant restaurant = jsonToRestaurant(readFileToString(file.toPath()));
             searchQuery.feed(restaurant);
         }
         searchQuery.finish();
@@ -384,12 +386,12 @@ public class Database {
         assert files != null;
         List<Restaurant> all = new ArrayList<>();
         for (File file : files) {
-            Restaurant restaurant = gson.fromJson(readFileToString(file.toPath()), Restaurant.class);
+            Restaurant restaurant = jsonToRestaurant(readFileToString(file.toPath()));
             all.add(restaurant);
             count--;
             if (count <= 0) break;
         }
-        return gson.toJson(all);
+        return toJson(all);
     }
 
     public boolean checkPassword(String phoneNumber, String password) {

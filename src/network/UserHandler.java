@@ -1,12 +1,16 @@
-import com.google.gson.Gson;
+package network;
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import static util.JsonUtil.*;
+import models.RestaurantPredicate;
+import models.Restaurant;
+import models.SearchQuery;
 
-public class UserHandler extends ClientHandler{
+public class UserHandler extends ClientHandler {
 
     private final String[] AnalyzableCommand;
 

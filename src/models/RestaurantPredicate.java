@@ -1,3 +1,5 @@
+package models;
+
 import java.util.function.Predicate;
 
 public class RestaurantPredicate {
