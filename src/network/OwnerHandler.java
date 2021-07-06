@@ -93,7 +93,7 @@ public class OwnerHandler extends ClientHandler {
 
     //login [phoneNumber] [password], response: {owner account object (COMPLETE)} or null
     private String login(String[] ac) {
-        if (!database.checkPassword(ac[1], ac[2])) {
+        if (!database.checkPassword(ac[1], ac[2], false)) {
             return getError(2);
         }
         var map = jsonToMap(database.getJson(ac[1], false));

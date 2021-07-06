@@ -3,6 +3,8 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import java.lang.reflect.Type;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+
 import models.Restaurant;
 import models.RestaurantPredicate;
 
@@ -34,5 +36,9 @@ public class JsonUtil {
 
     public static Restaurant jsonToRestaurant(String json) {
         return gson.fromJson(json, Restaurant.class);
+    }
+
+    public static ConcurrentHashMap<String, String> jsonToConcurrentHashMap(String json) {
+        return gson.fromJson(json, ConcurrentHashMap.class);
     }
 }

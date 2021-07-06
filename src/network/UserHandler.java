@@ -135,8 +135,7 @@ public class UserHandler extends ClientHandler {
     }
     //login(*)PhoneNumber(*)Password
     private String login(String[] ac){
-        if (!database.checkPassword(ac[1],ac[2]))
-        {
+        if (!database.checkPassword(ac[1],ac[2], true)) {
             return getError(2);
         }
         var map = jsonToMap(database.getJson(ac[1], true));

@@ -1,7 +1,6 @@
 package network;
 
 import java.io.*;
-import java.lang.reflect.Type;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -9,7 +8,6 @@ import java.nio.file.Paths;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Semaphore;
-import com.google.gson.reflect.TypeToken;
 import models.Restaurant;
 import models.SearchQuery;
 import static util.JsonUtil.*;
@@ -23,11 +21,13 @@ public class Database {
     private File userAccountsDirectory;
     private File ownerAccountsDirectory;
     private File discountsDirectory;
-    private File loginDataFile;
-    private Map<String, String> loginData;
+    private File usersLoginDataFile;
+    private ConcurrentHashMap<String, String> usersLoginData;
+    private File ownersLoginDataFile;
+    private ConcurrentHashMap<String, String> ownersLoginData;
     private File ownerOfFile;
-    private Map<String, String> ownerOf; //restaurantID to phoneNumber of owner
-    private final Map<String, Semaphore> locks;
+    private ConcurrentHashMap<String, String> ownerOf; //restaurantID to phoneNumber of owner
+    private final ConcurrentHashMap<String, Semaphore> locks;
     private final int MAX_PERMITS = 10;
 
     public Database(String directory) {
@@ -58,31 +58,38 @@ public class Database {
         ownerAccountsDirectory.mkdir();
         discountsDirectory = new File(mainDirectory.getAbsolutePath() + File.separator + "discounts");
         discountsDirectory.mkdir();
-        loginDataFile = new File(mainDirectory.getAbsolutePath() + File.separator + "loginData.json");
+        usersLoginDataFile = new File(mainDirectory.getAbsolutePath() + File.separator + "usersLoginData.json");
+        ownersLoginDataFile = new File(mainDirectory.getAbsolutePath() + File.separator + "ownersLoginData.json");
         ownerOfFile = new File(mainDirectory.getAbsolutePath() + File.separator + "ownerOf.json");
     }
 
     private void load() {
         try {
-            loginDataFile.createNewFile();
+            usersLoginDataFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        loginData = jsonToMapString(readFileToString(loginDataFile.toPath()));
-        if (loginData == null) {
-            loginData = new ConcurrentHashMap<>();
+        usersLoginData = jsonToConcurrentHashMap(readFileToString(usersLoginDataFile.toPath()));
+        if (usersLoginData == null) {
+            usersLoginData = new ConcurrentHashMap<>();
+        }
+        try {
+            ownersLoginDataFile.createNewFile();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        ownersLoginData = jsonToConcurrentHashMap(readFileToString(ownersLoginDataFile.toPath()));
+        if (ownersLoginData == null) {
+            ownersLoginData = new ConcurrentHashMap<>();
         }
         try {
             ownerOfFile.createNewFile();
         } catch (IOException e) {
             e.printStackTrace();
         }
-        ownerOf = new ConcurrentHashMap<>();
-        Type type = new TypeToken<Map<String, String>>(){}.getType();
-        Map<String, String> ownerOfMap = jsonToMapString(readFileToString(ownerOfFile.toPath()));
-        if (ownerOfMap == null) return;
-        for (String key : ownerOfMap.keySet()) {
-            ownerOf.put(key, ownerOfMap.get(key));
+        ownerOf = jsonToConcurrentHashMap(readFileToString(ownerOfFile.toPath()));
+        if (ownerOf == null) {
+            ownerOf = new ConcurrentHashMap<>();
         }
     }
 
@@ -93,13 +100,11 @@ public class Database {
        Random random = new Random();
        String rand1 = Integer.toString(random.nextInt(0x10000),16).toUpperCase();
        if (rand1.length() < 4) {
-//           result.insert(0, "0".repeat(4 - rand1.length()));
            rand1 = "0".repeat(4 - rand1.length()) + rand1;
        }
        result.append(rand1).append("-");
        String rand2 = Integer.toString(random.nextInt(0x10000),16).toUpperCase(Locale.ROOT);
        if (rand2.length() < 4) {
-//           result.insert(0, "0".repeat(4 - rand2.length()));
            rand2 = "0".repeat(4 - rand2.length()) + rand2;
        }
        result.append(rand2);
@@ -267,8 +272,13 @@ public class Database {
 
     //for signup
     public void createNewObj(String phoneNumber, String password, boolean isUser, String JSON) {
-        loginData.put(phoneNumber, password);
-        writeFileFromString(loginDataFile.toPath(), toJson(loginData));
+        if (isUser) {
+            usersLoginData.put(phoneNumber, password);
+            writeFileFromString(usersLoginDataFile.toPath(), toJson(usersLoginData));
+        } else {
+            ownersLoginData.put(phoneNumber, password);
+            writeFileFromString(ownersLoginDataFile.toPath(), toJson(ownersLoginData));
+        }
         Path path;
         if (isUser) {
             path = Paths.get(userAccountsDirectory.getAbsolutePath() + File.separator + phoneNumber + ".json");
@@ -394,8 +404,11 @@ public class Database {
         return toJson(all);
     }
 
-    public boolean checkPassword(String phoneNumber, String password) {
-        return password.equals(loginData.get(phoneNumber));
+    public boolean checkPassword(String phoneNumber, String password, boolean isUser) {
+        if (isUser) {
+            return password.equals(usersLoginData.get(phoneNumber));
+        }
+        return password.equals(ownersLoginData.get(phoneNumber));
     }
 
     public boolean isPhoneNumberUnique(String phoneNumber) {
