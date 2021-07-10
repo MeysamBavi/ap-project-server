@@ -114,17 +114,24 @@ public class Database {
    private String getPrefix(String type) {
         switch (type) {
             case "restaurant":
+            case "Restaurant":
                 return "R";
             case "order":
+            case "Order":
                 return "O";
             case "comment":
+            case "Comment":
                 return "C";
+            case "foodmenu":
+            case "Foodmenu":
+            case "FoodMenu":
             case "foodMenu":
                 return "M";
             case "food":
+            case "Food":
                 return "F";
         }
-        return "X";
+        throw new RuntimeException("Invalid type for serializing: " + type);
    }
 
     // returns json string to caller (probably server). server can modify object with gson or directly send it to client.
