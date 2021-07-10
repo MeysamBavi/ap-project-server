@@ -50,9 +50,6 @@ public class OwnerHandler extends ClientHandler {
                     case "editRestaurant":
                         response = editRestaurant(analyzableCommand);
                         break;
-                    case "editMenu":
-                        response = editMenu(analyzableCommand);
-                        break;
                     case "addImage":
                         response = addImage(analyzableCommand);
                         break;
@@ -67,12 +64,6 @@ public class OwnerHandler extends ClientHandler {
                         break;
                     case "isPhoneNumberUnique":
                         response = isPhoneNumberUnique(analyzableCommand);
-                        break;
-                    case "save":
-                        response = save(analyzableCommand);
-                        break;
-                    case "saveFood":
-                        response = saveFood(analyzableCommand);
                         break;
                     case "getMenu":
                         response = getMenu(analyzableCommand);
@@ -115,7 +106,7 @@ public class OwnerHandler extends ClientHandler {
         return toJson(map);
     }
 
-    //signup [phoneNumber] [password] {owner account} [restaurantID] {restaurant object}
+    //signup [phoneNumber] [password] {owner account} [restaurantID] {restaurant object} [menu ID] {menu object}
     private String signUp(String[] ac) {
         if (!database.isPhoneNumberUnique(ac[1])) {
             return getError(3);
@@ -123,6 +114,7 @@ public class OwnerHandler extends ClientHandler {
         database.createNewObj(ac[1], ac[2], false, ac[3]);
         database.createNewObj(ac[4], ac[5]);
         database.addOwnerOf(ac[4], ac[1]);
+        database.createNewObj(ac[6], ac[7]);
         return String.valueOf(true);
     }
 
@@ -153,20 +145,15 @@ public class OwnerHandler extends ClientHandler {
         return String.valueOf(true);
     }
 
-    //addFood [menu id] [food id] {food object}
+    //addFood [menu id] {menu object} [food id] {food object}
     private String addFood(String[] ac) {
-        database.createNewObj(ac[1], ac[2], ac[3]);
+        database.createNewObj(ac[1], ac[3], ac[4]);
+        database.saveChangeByID(ac[1], ac[2]);
         return String.valueOf(true);
     }
 
     //editRestaurant [restaurant id] {restaurant object}
     private String editRestaurant(String[] ac) {
-        database.saveChangeByID(ac[1], ac[2]);
-        return String.valueOf(true);
-    }
-
-    //editMenu [menu id] [menu object]
-    private String editMenu(String[] ac) {
         database.saveChangeByID(ac[1], ac[2]);
         return String.valueOf(true);
     }
@@ -200,18 +187,6 @@ public class OwnerHandler extends ClientHandler {
         return String.valueOf(database.isPhoneNumberUnique(ac[1]));
     }
 
-    //save [object id] {json}
-    private String save(String[] ac) {
-        database.saveChangeByID(ac[1], ac[2]);
-        return String.valueOf(true);
-    }
-
-    //saveFood [menu ID] [food ID] {food json}
-    private String saveFood(String[] ac) {
-        database.saveChangeByID(ac[1], ac[2], ac[3]);
-        return String.valueOf(true);
-    }
-
     //getMenu [menu ID]
     private String getMenu(String[] ac) {
         String json = database.getJson(ac[1]);
@@ -233,9 +208,10 @@ public class OwnerHandler extends ClientHandler {
         return toJson(menuMap);
     }
 
-    //removeFood [menuID] [foodID]
+    //removeFood [menuID] [foodID] {menu object}
     private String removeFood(String[] ac) {
         database.removeFood(ac[1], ac[2]);
+        database.saveChangeByID(ac[1], ac[3]);
         return String.valueOf(true);
     }
 }
