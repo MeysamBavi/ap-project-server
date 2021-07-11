@@ -22,6 +22,9 @@ public class LoginHandler extends ClientHandler {
             } else if (analyzableCommand[0].equals("owner")) {
                 Thread ownerHandler = toOwnerHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
                 ownerHandler.start();
+            } else if (analyzableCommand[0].equals("ping")) {
+                writeString(".");
+                endConnection();
             } else {
                 //close streams and terminate connection
                 endConnection();
