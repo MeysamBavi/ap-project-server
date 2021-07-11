@@ -78,6 +78,9 @@ public class UserHandler extends ClientHandler {
                     case "getMenu":
                         Response = getMenu(AnalyzableCommand);
                         break;
+                    default:
+                        log("Invalid command.");
+                        break;
                 }
                 writeString(Response == null ? "null" : Response);
                 endConnection();
@@ -91,15 +94,18 @@ public class UserHandler extends ClientHandler {
     //signup(*)PhoneNumber(*)Password(*)JSON
     private String signup(String[] ac){
         if (database.isPhoneNumberUnique(ac[1])) {
+            log("Signing up for user %s", ac[1]);
             database.createNewObj(ac[1], ac[2], true, ac[3]);
             return String.valueOf(true);
         }
+        log("Signup failed with error code 3 for user %s", ac[1]);
         return getError(3);
     }
     //order(*)userID(*)newJson(*)orderID(*)orderJSON(*)restaurantID
     //reorder has no difference with order :)
     private String order(String[] ac)
     {
+        log("Requesting for user %s an order with ID %s from restaurant with ID %s", ac[1], ac[3], ac[5]);
         database.saveChangeByID(ac[3], ac[4]);
         database.saveChangeByID(ac[1], true, ac[2]);
         database.addOrderToOwnerFile(ac[5], ac[3]);
@@ -108,18 +114,21 @@ public class UserHandler extends ClientHandler {
     //credit(*)userID(*)newJson
     private String credit(String[] ac)
     {
+        log("Saving user account %s (credit)", ac[1]);
         database.saveChangeByID(ac[1],true, ac[2]);
         return String.valueOf(true);
     }
     //address(*)userID(*)newJson
     private String address(String[] ac)
     {
+        log("Saving user account %s (address)", ac[1]);
         database.saveChangeByID(ac[1],true, ac[2]);
         return String.valueOf(true);
     }
     //comment(*)UserID(*)UserJSON(*)RestaurantID(*)CommentID(*)CommentJSON
     private String comment(String[] ac)
     {
+        log("Adding a new comment with ID %s from user %s for restaurant with ID %s", ac[4], ac[1], ac[3]);
         database.createNewObj(ac[4], ac[5]);
         database.saveChangeByID(ac[1],true, ac[2]);
         database.addCommentToRestaurantFile(ac[3], ac[4]);
@@ -129,15 +138,20 @@ public class UserHandler extends ClientHandler {
     private String search(String[] ac){
         RestaurantPredicate searchPredicate = jsonToRestaurantPredicate(ac[1]);
         SearchQuery<Restaurant> searchQuery = new SearchQuery<Restaurant>(searchPredicate.generate());
+        log("Searching database for restaurant query with hashcode %d", searchQuery.hashCode());
         database.search(searchQuery);
         List<Restaurant> listOfRestaurants = searchQuery.getValue();
+        log("Search finished for query with hashcode %d", searchQuery.hashCode());
         return toJson(listOfRestaurants);
     }
     //login(*)PhoneNumber(*)Password
     private String login(String[] ac){
         if (!database.checkPassword(ac[1],ac[2], true)) {
+            log("Login failed with error code 2 for user %s", ac[1]);
             return getError(2);
         }
+        log("Logging in for user %s", ac[1]);
+
         var map = jsonToMap(database.getJson(ac[1], true));
 
         List<String> previousOrdersIDs = (List<String>) map.get("previousOrders");
@@ -156,57 +170,67 @@ public class UserHandler extends ClientHandler {
             cartItem.put("restaurant", jsonToObject(database.getJson((String) cartItem.get("restaurantID"))));
             cartItem.remove("restaurantID");
         }
-
-       return toJson(map);
+        return toJson(map);
     }
     //serialize(*)[ObjectType]
-    private String serialize(String[] ac){
+    private String serialize(String[] ac) {
+        log("Serializing request for object of type %s", ac[1]);
         return database.generateID(ac[1]);
     }
 
     //recommended(*)count
     private String recommended(String[] ac) {
-        return database.getAllRestaurants(Integer.parseInt(ac[1]));
+        int count = Integer.parseInt(ac[1]);
+        log("Getting %d recommended restaurants from database", count);
+        return database.getAllRestaurants(count);
     }
 
     //Discount(*)code
     private String discount(String[] ac)
     {
+        log("Getting discount with code %s", ac[1]);
         String json = database.getDiscountJson(ac[1]);
         return json == null ? getError(1) : json;
     }
 
     //useDiscount(*)code
     private String useDiscount(String[] ac) {
+        log("Removing discount with code %s", ac[1]);
         database.removeDiscount(ac[1]);
         return String.valueOf(true);
     }
 
     //get(*)objectID
     private String get(String[] ac) {
+        log("Getting object with ID %s", ac[1]);
         String json =  database.getJson(ac[1]);
         return json == null ? getError(1) : json;
     }
 
     //getFood(*)menuID(*)foodID
     private String getFood(String[] ac) {
+        log("Getting food with ID %s and menu ID", ac[2], ac[1]);
         String json =  database.getJson(ac[1], ac[2]);
         return json == null ? getError(1) : json;
     }
 
     //isPhoneNumberUnique(*)[phoneNumber]
     private String isPhoneNumberUnique(String[] ac) {
-        return String.valueOf(database.isPhoneNumberUnique(ac[1]));
+        String result = String.valueOf(database.isPhoneNumberUnique(ac[1]));
+        log("Checked the uniqueness of %s. The result is %s", ac[1], result);
+        return result;
     }
 
     //save(*)[object id](*){json}
     private String save(String[] ac) {
+        log("Saving object with ID %s", ac[1]);
         database.saveChangeByID(ac[1], ac[2]);
         return String.valueOf(true);
     }
 
     //getMenu(*)[menu ID]
     private String getMenu(String[] ac) {
+        log("Getting menu with ID %s", ac[1]);
         String json = database.getJson(ac[1]);
         if (json == null) {
             return getError(1);

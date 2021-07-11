@@ -24,6 +24,7 @@ public class LoginHandler extends ClientHandler {
                 ownerHandler.start();
             } else if (analyzableCommand[0].equals("ping")) {
                 writeString(".");
+                log("Ping message received.");
                 endConnection();
             } else {
                 //close streams and terminate connection

@@ -4,6 +4,9 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.time.Clock;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
 public abstract class ClientHandler extends Thread {
     final Database database;
@@ -11,6 +14,8 @@ public abstract class ClientHandler extends Thread {
     private DataOutputStream dos;
     private DataInputStream dis;
     public static String separator = "\\|\\*\\|\\*\\|";
+    private final Clock clock = Clock.systemDefaultZone();
+    private final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss").withZone(ZoneId.systemDefault());
 
     ClientHandler(Socket socket, Database database) throws IOException {
         this(socket, database, new DataInputStream(socket.getInputStream()), new DataOutputStream(socket.getOutputStream()));
@@ -47,9 +52,17 @@ public abstract class ClientHandler extends Thread {
 
     //1: file not found
     //2: wrong password / username
-    //3: duplicate phonenumber
+    //3: duplicate phoneNumber
     public String getError(int errorCode) {
         return "Error " + errorCode;
+    }
+
+    public void log(String message) {
+        System.out.printf("[ %s ] ( %s )\t: %s\n", formatter.format(clock.instant()), this, message);
+    }
+
+    public void log(String format, Object... args) {
+        log(String.format(format, args));
     }
 
 }

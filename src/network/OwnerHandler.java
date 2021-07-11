@@ -71,6 +71,9 @@ public class OwnerHandler extends ClientHandler {
                     case "removeFood":
                         response = removeFood(analyzableCommand);
                         break;
+                    default:
+                        log("Invalid command.");
+                        break;
                 }
                 writeString(response == null ? "null" : response);
                 endConnection();
@@ -85,8 +88,11 @@ public class OwnerHandler extends ClientHandler {
     //login [phoneNumber] [password], response: {owner account object (COMPLETE)} or null
     private String login(String[] ac) {
         if (!database.checkPassword(ac[1], ac[2], false)) {
+            log("Login failed with error code 2 for owner %s", ac[1]);
             return getError(2);
         }
+        log("Logging in for owner %s", ac[1]);
+
         var map = jsonToMap(database.getJson(ac[1], false));
 
         String restaurantID = (String) map.get("restaurantID");
@@ -109,8 +115,11 @@ public class OwnerHandler extends ClientHandler {
     //signup [phoneNumber] [password] {owner account} [restaurantID] {restaurant object} [menu ID] {menu object}
     private String signUp(String[] ac) {
         if (!database.isPhoneNumberUnique(ac[1])) {
+            log("Signup failed with error code 3 for owner %s", ac[1]);
             return getError(3);
         }
+        log("Signing up for owner %s with restaurant ID %s and menu ID %s", ac[1], ac[4], ac[6]);
+
         database.createNewObj(ac[1], ac[2], false, ac[3]);
         database.createNewObj(ac[4], ac[5]);
         database.addOwnerOf(ac[4], ac[1]);
@@ -120,11 +129,13 @@ public class OwnerHandler extends ClientHandler {
 
     //serialize [object type], response: id string
     private String serialize(String[] ac) {
+        log("Serializing request for object of type %s", ac[1]);
         return database.generateID(ac[1]);
     }
 
     //activeOrders [phoneNumber], response: {json object with one field (activeOrders)}
     private String getActiveOrders(String[] ac) {
+        log("Sending active orders for owner %s", ac[1]);
         List<String> activeOrdersIDs = (List<String>) jsonToObject(database.getActiveOrdersJson(ac[1]));
         final List<Object> activeOrders = new ArrayList<>(activeOrdersIDs.size());
         activeOrdersIDs.forEach((e) -> activeOrders.add(jsonToObject(database.getJson(e))));
@@ -133,6 +144,7 @@ public class OwnerHandler extends ClientHandler {
 
     //deliver [order id] {order object} [phoneNumber] {owner account} {active orders}
     private String deliver(String[] ac) {
+        log("Delivering order with ID %s for owner %s", ac[1], ac[3]);
         database.saveChangeByID(ac[1], ac[2]);
         database.saveChangeByID(ac[3], false, ac[4]);
         database.saveActiveOrders(ac[3], ac[5]);
@@ -141,12 +153,14 @@ public class OwnerHandler extends ClientHandler {
 
     //editFood [menu id] [food id] {food object}
     private String editFood(String[] ac) {
+        log("Editing food with ID %s and menu ID %s", ac[2], ac[1]);
         database.saveChangeByID(ac[1], ac[2], ac[3]);
         return String.valueOf(true);
     }
 
     //addFood [menu id] {menu object} [food id] {food object}
     private String addFood(String[] ac) {
+        log("Adding food with ID %s to menu with ID %s", ac[2], ac[1]);
         database.createNewObj(ac[1], ac[3], ac[4]);
         database.saveChangeByID(ac[1], ac[2]);
         return String.valueOf(true);
@@ -154,6 +168,7 @@ public class OwnerHandler extends ClientHandler {
 
     //editRestaurant [restaurant id] {restaurant object}
     private String editRestaurant(String[] ac) {
+        log("Editing restaurant with ID %s", ac[1]);
         database.saveChangeByID(ac[1], ac[2]);
         return String.valueOf(true);
     }
@@ -161,34 +176,41 @@ public class OwnerHandler extends ClientHandler {
     //addImage [image id] [image file]
     private String addImage(String[] analyzableCommand) {
 //        TODO
+        log("Unimplemented command (addImage)");
         return null;
     }
 
     //editImage [image id] [image file]
     private String editImage(String[] analyzableCommand) {
 //        TODO
+        log("Unimplemented command (editImage)");
         return null;
     }
 
     //editComment [comment id] {comment object}
     private String editComment(String[] ac) {
+        log("Editing comment with ID %s", ac[1]);
         database.saveChangeByID(ac[1], ac[2]);
         return String.valueOf(true);
     }
 
     //get [object id]
     private String get(String[] ac) {
+        log("Getting object with ID %s", ac[1]);
         String json =  database.getJson(ac[1]);
         return json == null ? getError(1) : json;
     }
 
     //isPhoneNumberUnique [phoneNumber]
     private String isPhoneNumberUnique(String[] ac) {
-        return String.valueOf(database.isPhoneNumberUnique(ac[1]));
+        String result = String.valueOf(database.isPhoneNumberUnique(ac[1]));
+        log("Checked the uniqueness of %s. The result is %s", ac[1], result);
+        return result;
     }
 
     //getMenu [menu ID]
     private String getMenu(String[] ac) {
+        log("Getting menu with ID %s", ac[1]);
         String json = database.getJson(ac[1]);
         if (json == null) {
             return getError(1);
@@ -210,6 +232,7 @@ public class OwnerHandler extends ClientHandler {
 
     //removeFood [menuID] [foodID] {menu object}
     private String removeFood(String[] ac) {
+        log("Removing food with ID %s from menu with ID %s", ac[2], ac[1]);
         database.removeFood(ac[1], ac[2]);
         database.saveChangeByID(ac[1], ac[3]);
         return String.valueOf(true);
