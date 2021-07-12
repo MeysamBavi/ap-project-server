@@ -329,12 +329,17 @@ public class Database {
         saveActiveOrders(ownerPhoneNumber, toJson(activeOrderIDs));
     }
 
-    public void addCommentToRestaurantFile(String restaurantID, String commentID) {
-        Map<String, Object> restaurant = jsonToMap(getJson(restaurantID));
-        List<String> commentIDs = (List<String>) restaurant.get("commentIDs");
-        commentIDs.add(commentID);
-        restaurant.put("commentIDs", commentIDs);
+    public void addCommentToRestaurantFile(String restaurantID, String commentID, int commentScore) {
+        Restaurant restaurant = jsonToRestaurant(getJson(restaurantID));
+        restaurant.commentIDs.add(0, commentID);
+        restaurant.score = calculateNewAverage(restaurant.score,  (int) restaurant.numberOfComments, commentScore);
+        restaurant.numberOfComments++;
         saveChangeByID(restaurantID, toJson(restaurant));
+    }
+
+    private double calculateNewAverage(double oldAverage, int oldCount, int pointToBeAdded) {
+        if (oldCount < 0) throw new ArithmeticException("oldCount can't be negative");
+        return ( (oldCount * oldAverage) + pointToBeAdded) / (oldCount + 1);
     }
 
     //if doesn't exist, this returns null

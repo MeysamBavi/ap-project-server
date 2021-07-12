@@ -125,13 +125,21 @@ public class UserHandler extends ClientHandler {
         database.saveChangeByID(ac[1],true, ac[2]);
         return String.valueOf(true);
     }
-    //comment(*)UserID(*)UserJSON(*)RestaurantID(*)CommentID(*)CommentJSON
+    //comment(*)UserID(*)UserJSON(*)RestaurantID(*)CommentID(*)CommentJSON(*)CommentScore
     private String comment(String[] ac)
     {
         log("Adding a new comment with ID %s from user %s for restaurant with ID %s", ac[4], ac[1], ac[3]);
+
+        int commentScore = 3;
+        try {
+            commentScore = Integer.parseInt(ac[6]);
+        } catch (Exception e) {
+            log(e.getMessage());
+        }
+
         database.createNewObj(ac[4], ac[5]);
         database.saveChangeByID(ac[1],true, ac[2]);
-        database.addCommentToRestaurantFile(ac[3], ac[4]);
+        database.addCommentToRestaurantFile(ac[3], ac[4], commentScore);
         return String.valueOf(true);
     }
     //search(*){restaurant predicate json}
