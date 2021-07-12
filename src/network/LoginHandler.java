@@ -17,11 +17,11 @@ public class LoginHandler extends ClientHandler {
             String message = readString();
             String[] analyzableCommand = message.split(separator);
             if (analyzableCommand[0].equals("user")) {
-                Thread userHandler = toUserHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
-                userHandler.start();
+                var userHandler = toUserHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
+                userHandler.run();
             } else if (analyzableCommand[0].equals("owner")) {
-                Thread ownerHandler = toOwnerHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
-                ownerHandler.start();
+                var ownerHandler = toOwnerHandler(Arrays.copyOfRange(analyzableCommand, 1, analyzableCommand.length));
+                ownerHandler.run();
             } else if (analyzableCommand[0].equals("ping")) {
                 writeString(".");
                 log("Ping message received.");

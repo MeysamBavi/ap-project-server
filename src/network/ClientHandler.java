@@ -8,7 +8,7 @@ import java.time.Clock;
 import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 
-public abstract class ClientHandler extends Thread {
+public abstract class ClientHandler implements Runnable {
     final Database database;
     private Socket socket;
     private DataOutputStream dos;
@@ -58,7 +58,7 @@ public abstract class ClientHandler extends Thread {
     }
 
     public void log(String message) {
-        System.out.printf("[ %s ] ( %s )\t: %s\n", formatter.format(clock.instant()), this, message);
+        System.out.printf("%2d [ %s ] ( %s )\t: %s\n", Thread.currentThread().getId(), formatter.format(clock.instant()), this, message);
     }
 
     public void log(String format, Object... args) {
