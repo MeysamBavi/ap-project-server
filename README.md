@@ -3,7 +3,7 @@
 ---
 
 ### Description
-This is one repository of the four repositories created for the final project of the **Advanced Programming course**, and contains the java source code for the **socket based** server app. To run the app you can download the java archive file [here](TODO) and run the commands 
+This is one repository of the four repositories created for the final project of the **Advanced Programming course**, and contains the java source code for the **socket based** server app. To run the app you can download the java archive file [here](https://github.com/MeysamBavi/ap-project-server/releases/download/v1.0.0/Server.jar) and run the commands 
 
 ```
 java -jar Server.jar 8081 .
